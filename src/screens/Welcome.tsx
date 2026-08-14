@@ -5,10 +5,22 @@ import { LoopLogo } from "../components/LoopLogo"
 import { seedDemoData } from "../lib/demo"
 import { setExplorerProfile } from "../lib/matching"
 
+const fadeUp = (delay: number) => ({
+  initial: { opacity: 0, y: 18 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.45, ease: "easeOut" as const },
+})
+
 export function Welcome() {
   const navigate = useNavigate()
   const [name, setName] = useState("")
   const [skipModal, setSkipModal] = useState(false)
+
+  const storedName = localStorage.getItem("bookloop.name") || "Reader"
+  const hasQuiz = !!localStorage.getItem("bookloop.quiz")
+  const isExplorerReturning = !hasQuiz && localStorage.getItem("bookloop.profile") === "explorer"
+  const isReturning = hasQuiz || isExplorerReturning
+  const firstName = storedName.split(" ")[0]
 
   const start = () => {
     localStorage.setItem("bookloop.name", name.trim() || "Reader")
@@ -21,6 +33,11 @@ export function Welcome() {
     navigate("/home")
   }
 
+  const demo = () => {
+    seedDemoData()
+    navigate("/dna")
+  }
+
   return (
     <div className="relative min-h-dvh overflow-hidden bg-forest text-paper">
       <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-amber/15 blur-3xl" />
@@ -28,16 +45,18 @@ export function Welcome() {
       <div className="pointer-events-none absolute top-1/3 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-forest-light/30 blur-3xl" />
 
       <div className="relative flex min-h-dvh flex-col items-center justify-center px-6 py-10">
-        <button
-          onClick={() => {
-            localStorage.setItem("bookloop.name", name.trim() || "Reader")
-            setExplorerProfile()
-            navigate("/home")
-          }}
-          className="absolute top-6 left-6 flex items-center gap-1.5 rounded-full border-2 border-amber bg-amber/15 px-4 py-2 text-sm font-bold text-amber backdrop-blur-sm transition hover:scale-105 hover:bg-amber/25 active:scale-95"
-        >
-          Skip for now <span>→</span>
-        </button>
+        {!isReturning && (
+          <button
+            onClick={() => {
+              localStorage.setItem("bookloop.name", name.trim() || "Reader")
+              setExplorerProfile()
+              navigate("/home")
+            }}
+            className="absolute top-6 left-6 flex items-center gap-1.5 rounded-full border-2 border-amber bg-amber/15 px-4 py-2 text-sm font-bold text-amber backdrop-blur-sm transition hover:scale-105 hover:bg-amber/25 active:scale-95"
+          >
+            Skip for now <span>→</span>
+          </button>
+        )}
 
         <motion.div
           initial={{ scale: 0.6, opacity: 0, rotate: -20 }}
@@ -54,90 +73,107 @@ export function Welcome() {
           transition={{ delay: 0.15 }}
           className="font-display text-lg italic text-amber"
         >
-          buy · read · resell · repeat
+          Every Book. A New Journey.
         </motion.p>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="font-display mt-3 text-center text-4xl leading-tight font-semibold text-paper sm:text-5xl"
-        >
-          Your next great read
-          <br />
-          is <span className="text-amber">already loved</span>.
-        </motion.h1>
+        {isReturning ? (
+          <motion.div {...fadeUp(0.25)} className="mt-12 w-full max-w-sm">
+            {hasQuiz ? (
+              <>
+                <h1 className="font-display text-center text-3xl leading-tight font-semibold sm:text-4xl">
+                  Welcome back, {firstName} <span className="inline-block">👋</span>
+                </h1>
+                <p className="mt-2 text-center text-paper/70">Pick up where you left off.</p>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="mt-4 max-w-sm text-center text-base leading-relaxed text-paper/80"
-        >
-          BookLoop learns your reading taste, then connects you with books people nearby
-          are selling or swapping — so you read more and spend less.
-        </motion.p>
+                <button
+                  onClick={() => navigate("/home")}
+                  className="btn btn-primary mt-8 h-14 w-full rounded-full border-0 bg-amber text-base font-semibold text-forest-deep shadow-[0_10px_30px_rgba(244,163,64,0.35)] transition-transform hover:scale-[1.02] hover:bg-amber-deep active:scale-95"
+                >
+                  Continue Reading
+                </button>
+                <button
+                  onClick={() => navigate("/quiz")}
+                  className="mt-3 h-12 w-full rounded-full border-2 border-paper/25 bg-transparent text-sm font-semibold text-paper/85 transition hover:border-amber hover:text-amber active:scale-95"
+                >
+                  🧬 Retake Book DNA
+                </button>
+                <button
+                  onClick={() => navigate("/marketplace")}
+                  className="mt-3 w-full text-center text-sm font-semibold text-paper/60 transition hover:text-amber"
+                >
+                  📚 Browse Marketplace
+                </button>
+              </>
+            ) : (
+              <>
+                <h1 className="font-display text-center text-3xl leading-tight font-semibold sm:text-4xl">
+                  Welcome back, {firstName} <span className="inline-block">👋</span>
+                </h1>
+                <p className="mt-2 text-center text-paper/70">Keep exploring — or personalize your picks.</p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="mt-6 flex gap-2"
-        >
-          {["Discover", "Buy", "Swap"].map((w) => (
-            <span key={w} className="rounded-full border border-amber/40 bg-amber/10 px-4 py-1.5 text-sm font-medium text-amber">
-              {w}
-            </span>
-          ))}
-        </motion.div>
+                <button
+                  onClick={() => navigate("/home")}
+                  className="btn btn-primary mt-8 h-14 w-full rounded-full border-0 bg-amber text-base font-semibold text-forest-deep shadow-[0_10px_30px_rgba(244,163,64,0.35)] transition-transform hover:scale-[1.02] hover:bg-amber-deep active:scale-95"
+                >
+                  🚀 Continue Exploring
+                </button>
+                <button
+                  onClick={() => navigate("/quiz")}
+                  className="mt-3 h-12 w-full rounded-full border-2 border-paper/25 bg-transparent text-sm font-semibold text-paper/85 transition hover:border-amber hover:text-amber active:scale-95"
+                >
+                  🧬 Take Book DNA Quiz
+                </button>
+              </>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div {...fadeUp(0.25)} className="mt-10 w-full max-w-sm">
+            <label htmlFor="name" className="mb-2 block text-sm font-medium text-paper/70">
+              What's your name?
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && start()}
+              placeholder="Your first name"
+              maxLength={30}
+              className="input w-full rounded-full border-0 bg-paper px-6 py-3.5 text-ink placeholder:text-ink/40 focus:outline-none focus:ring-4 focus:ring-amber/40"
+            />
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55 }}
-          className="mt-10 w-full max-w-sm"
-        >
-          <label htmlFor="name" className="mb-2 block text-sm font-medium text-paper/70">
-            What should we call you?
-          </label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && start()}
-            placeholder="Your first name"
-            maxLength={30}
-            className="input w-full rounded-full border-0 bg-paper px-6 py-3.5 text-ink placeholder:text-ink/40 focus:outline-none focus:ring-4 focus:ring-amber/40"
-          />
-          <button
-            onClick={start}
-            className="btn btn-primary mt-4 h-14 w-full rounded-full border-0 bg-amber text-base font-semibold text-forest-deep shadow-[0_10px_30px_rgba(244,163,64,0.35)] transition-transform hover:scale-[1.02] hover:bg-amber-deep active:scale-95"
-          >
-            📖 Discover My Book DNA
+            <div className="my-6 h-px w-full bg-paper/15" />
+
+            <button
+              onClick={start}
+              className="btn btn-primary h-14 w-full rounded-full border-0 bg-amber text-base font-semibold text-forest-deep shadow-[0_10px_30px_rgba(244,163,64,0.35)] transition-transform hover:scale-[1.02] hover:bg-amber-deep active:scale-95"
+            >
+              🧬 Discover My Book DNA
+            </button>
+            <p className="mt-2 text-center text-xs leading-relaxed text-paper/50">
+              Answer 5 quick questions to unlock personalized book recommendations.
+            </p>
+
+            <button
+              onClick={() => setSkipModal(true)}
+              className="mt-4 h-12 w-full rounded-full border-2 border-amber/50 bg-transparent text-sm font-semibold text-amber transition hover:border-amber hover:bg-amber/10 active:scale-95"
+            >
+              🚀 Explore BookLoop
+            </button>
+
+            <div className="my-6 h-px w-full bg-paper/15" />
+
+            <p className="text-center text-xs leading-relaxed text-paper/50">
+              You can always personalize your recommendations later with the Book DNA Quiz.
+            </p>
+          </motion.div>
+        )}
+
+        {!isReturning && (
+          <button onClick={demo} className="mt-10 text-xs font-medium text-paper/40 transition hover:text-amber">
+            🎬 Developer demo
           </button>
-          <button
-            onClick={() => setSkipModal(true)}
-            className="mt-3 h-12 w-full rounded-full border-2 border-amber/50 bg-transparent text-sm font-semibold text-amber transition hover:border-amber hover:bg-amber/10 active:scale-95"
-          >
-            🚀 Explore BookLoop
-          </button>
-          <p className="mt-4 text-center text-xs leading-relaxed text-paper/50">
-            Not sure yet? You can always take the Book DNA Quiz later from your Profile.
-          </p>
-          <p className="mt-2 text-center text-xs text-paper/40">
-            Takes ~30 seconds. No account needed yet.
-          </p>
-          <button
-            onClick={() => {
-              seedDemoData()
-              navigate("/dna")
-            }}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-paper/25 py-3 text-sm font-semibold text-paper/85 backdrop-blur-sm transition hover:border-amber hover:text-amber active:scale-95"
-          >
-            🎬 Demo Mode — sample data in one tap
-          </button>
-        </motion.div>
+        )}
       </div>
 
       <AnimatePresence>
