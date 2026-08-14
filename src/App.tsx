@@ -1,5 +1,6 @@
 import { Suspense, lazy } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { SpeedInsights } from "@vercel/speed-insights/react"
 import { Layout } from "./components/Layout"
 import { PageLoader } from "./components/PageLoader"
 
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="*" element={<Welcome />} />
         </Routes>
       </Suspense>
+      <SpeedInsights />
     </BrowserRouter>
   )
 }
