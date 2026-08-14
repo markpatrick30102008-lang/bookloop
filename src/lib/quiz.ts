@@ -1067,6 +1067,14 @@ export const ARCHETYPES: Record<string, Archetype> = {
     traits: ["Comfort-seeker", "Rereader", "Tea-in-hand"],
     tags: ["cozy", "heart"],
   },
+  explorer: {
+    id: "explorer",
+    name: "The Explorer",
+    emoji: "🧭",
+    blurb: "You're keeping every door open. Until your Book DNA arrives, we're surfacing a balanced mix across all genres.",
+    traits: ["Open to everything", "Genre-hopper", "Taste explorer"],
+    tags: ["fantasy", "scifi", "mystery", "heart", "cozy", "thinker"],
+  },
 }
 
 export const ARCHETYPE_ORDER = ["escapist", "sleuth", "heart", "thinker", "cozy"]

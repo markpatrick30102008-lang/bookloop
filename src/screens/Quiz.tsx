@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { AnimatePresence, motion } from "framer-motion"
 import { pickQuizQuestions } from "../lib/quiz"
+import { setExplorerProfile } from "../lib/matching"
 
 function ProgressRing({ step, total }: { step: number; total: number }) {
   const r = 26
@@ -57,6 +58,7 @@ export function Quiz() {
         setStep(step + 1)
         setSelected(null)
       } else {
+        localStorage.removeItem("bookloop.profile")
         localStorage.setItem("bookloop.quiz", JSON.stringify(next))
         navigate("/result")
       }
@@ -91,7 +93,10 @@ export function Quiz() {
               </svg>
             </button>
             <button
-              onClick={() => navigate("/home")}
+              onClick={() => {
+                setExplorerProfile()
+                navigate("/home")
+              }}
               className="flex items-center gap-1.5 rounded-full border-2 border-amber bg-amber/15 px-4 py-2 text-sm font-bold text-amber transition hover:scale-105 hover:bg-amber/25 active:scale-95"
             >
               Skip <span>→</span>

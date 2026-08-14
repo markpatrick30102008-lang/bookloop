@@ -1,16 +1,24 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { LoopLogo } from "../components/LoopLogo"
 import { seedDemoData } from "../lib/demo"
+import { setExplorerProfile } from "../lib/matching"
 
 export function Welcome() {
   const navigate = useNavigate()
   const [name, setName] = useState("")
+  const [skipModal, setSkipModal] = useState(false)
 
   const start = () => {
     localStorage.setItem("bookloop.name", name.trim() || "Reader")
     navigate("/quiz")
+  }
+
+  const explore = () => {
+    localStorage.setItem("bookloop.name", name.trim() || "Reader")
+    setExplorerProfile()
+    navigate("/home")
   }
 
   return (
@@ -23,6 +31,7 @@ export function Welcome() {
         <button
           onClick={() => {
             localStorage.setItem("bookloop.name", name.trim() || "Reader")
+            setExplorerProfile()
             navigate("/home")
           }}
           className="absolute top-6 left-6 flex items-center gap-1.5 rounded-full border-2 border-amber bg-amber/15 px-4 py-2 text-sm font-bold text-amber backdrop-blur-sm transition hover:scale-105 hover:bg-amber/25 active:scale-95"
@@ -105,9 +114,18 @@ export function Welcome() {
             onClick={start}
             className="btn btn-primary mt-4 h-14 w-full rounded-full border-0 bg-amber text-base font-semibold text-forest-deep shadow-[0_10px_30px_rgba(244,163,64,0.35)] transition-transform hover:scale-[1.02] hover:bg-amber-deep active:scale-95"
           >
-            Discover my Book DNA
+            📖 Discover My Book DNA
           </button>
-          <p className="mt-4 text-center text-xs text-paper/50">
+          <button
+            onClick={() => setSkipModal(true)}
+            className="mt-3 h-12 w-full rounded-full border-2 border-amber/50 bg-transparent text-sm font-semibold text-amber transition hover:border-amber hover:bg-amber/10 active:scale-95"
+          >
+            🚀 Explore BookLoop
+          </button>
+          <p className="mt-4 text-center text-xs leading-relaxed text-paper/50">
+            Not sure yet? You can always take the Book DNA Quiz later from your Profile.
+          </p>
+          <p className="mt-2 text-center text-xs text-paper/40">
             Takes ~30 seconds. No account needed yet.
           </p>
           <button
@@ -121,6 +139,52 @@ export function Welcome() {
           </button>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {skipModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSkipModal(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 12 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 12 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-3xl bg-paper p-6 text-ink shadow-2xl"
+            >
+              <h2 className="font-display text-2xl font-semibold">Skip Book DNA?</h2>
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                The Book DNA Quiz helps us recommend books you'll genuinely love. You can skip it for now and take it anytime from your Profile.
+              </p>
+              <div className="mt-6 flex flex-col gap-2.5">
+                <button
+                  onClick={() => {
+                    setSkipModal(false)
+                    start()
+                  }}
+                  className="btn btn-primary h-12 w-full rounded-full border-0 bg-amber text-base font-semibold text-forest-deep shadow-[0_10px_30px_rgba(244,163,64,0.35)] transition-transform hover:scale-[1.02] hover:bg-amber-deep active:scale-95"
+                >
+                  📖 Take Quiz
+                </button>
+                <button
+                  onClick={() => {
+                    setSkipModal(false)
+                    explore()
+                  }}
+                  className="h-12 w-full rounded-full border-2 border-ink/15 text-sm font-semibold text-ink transition hover:border-forest hover:text-forest active:scale-95"
+                >
+                  🚀 Explore Anyway
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -5,7 +5,7 @@ import { LoopLogo } from "../components/LoopLogo"
 import { CoverImg } from "../components/CoverImg"
 import { MatchRing } from "../components/MatchRing"
 import { AboutModal } from "../components/AboutModal"
-import { scoreQuiz } from "../lib/quiz"
+import { archFromStorage } from "../lib/matching"
 import { BOOKS, LISTINGS, coverUrl } from "../data/books"
 
 const TRENDING_IDS = ["b4", "b13", "b7", "b5", "b9", "b3", "b10"]
@@ -22,14 +22,7 @@ export function Home() {
 
   const data = useMemo(() => {
     const name = localStorage.getItem("bookloop.name") || "Reader"
-    const raw = localStorage.getItem("bookloop.quiz")
-    let answers: string[][] = []
-    try {
-      answers = raw ? (JSON.parse(raw) as string[][]) : []
-    } catch {
-      answers = []
-    }
-    const arch = scoreQuiz(answers.length > 0 ? answers : [["cozy"]])
+    const arch = archFromStorage()
     const scored = BOOKS.map((b) => ({
       book: b,
       score: b.tags.reduce((s, t) => s + (arch.tags.includes(t) ? 1 : 0), 0),

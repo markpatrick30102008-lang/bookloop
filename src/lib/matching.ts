@@ -1,6 +1,14 @@
 import type { Book, Listing } from "../data/books"
 import { BOOKS } from "../data/books"
-import { ARCHETYPES, type Archetype } from "./quiz"
+import { ARCHETYPES, ARCHETYPE_ORDER, type Archetype } from "./quiz"
+
+export function setExplorerProfile(): void {
+  localStorage.setItem("bookloop.profile", "explorer")
+}
+
+export function isExplorer(): boolean {
+  return localStorage.getItem("bookloop.profile") === "explorer" && !localStorage.getItem("bookloop.quiz")
+}
 
 const TAG_PHRASES: Record<string, string> = {
   fantasy: "worlds that sweep you away",
@@ -140,6 +148,7 @@ export function buildCard(book: Book, listing: Listing, arch: Archetype): SwipeC
 }
 
 export function archFromStorage(): Archetype {
+  if (isExplorer()) return ARCHETYPES.explorer
   const raw = localStorage.getItem("bookloop.quiz")
   let answers: string[][] = []
   try {
@@ -152,11 +161,12 @@ export function archFromStorage(): Archetype {
   for (const a of answers) for (const t of a) counts[t] = (counts[t] ?? 0) + 1
   let best: Archetype | null = null
   let bestScore = -1
-  for (const a of Object.values(ARCHETYPES)) {
-    const score = a.tags.reduce((s, t) => s + (counts[t] ?? 0), 0)
+  for (const id of ARCHETYPE_ORDER) {
+    const arch = ARCHETYPES[id]
+    const score = arch.tags.reduce((s, t) => s + (counts[t] ?? 0), 0)
     if (score > bestScore) {
       bestScore = score
-      best = a
+      best = arch
     }
   }
   return best ?? ARCHETYPES.cozy

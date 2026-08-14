@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { AnimatePresence, motion } from "framer-motion"
-import { archFromStorage } from "../lib/matching"
+import { archFromStorage, isExplorer } from "../lib/matching"
 import { BOOKS, coverUrl } from "../data/books"
 import { conditionMeta } from "../lib/conditions"
 import { CoverImg } from "../components/CoverImg"
@@ -113,6 +113,24 @@ export function Profile() {
           </div>
         </div>
       </div>
+
+      {isExplorer() && (
+        <div className="mt-6 flex items-center gap-4 rounded-2xl border border-amber/40 bg-amber/10 p-4">
+          <span className="text-3xl">🧬</span>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-base font-semibold text-ink">Complete Your Book DNA</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-ink-soft">
+              Unlock more accurate recommendations by taking your personalized Book DNA Quiz.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/quiz")}
+            className="shrink-0 rounded-full bg-forest px-4 py-2 text-sm font-semibold text-paper transition hover:bg-forest-light active:scale-95"
+          >
+            Take Quiz
+          </button>
+        </div>
+      )}
 
       <div className="mt-6 grid grid-cols-3 gap-2">
         {reputation.map((r) => (
