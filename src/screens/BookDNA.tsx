@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
-import { archFromStorage, buildCard } from "../lib/matching"
+import { buildCard, genomeFromStorage } from "../lib/matching"
 import { BOOKS, LISTINGS, coverUrl, listingFor } from "../data/books"
 import { LoopLogo } from "../components/LoopLogo"
 
@@ -20,10 +20,10 @@ export function BookDNA() {
   const name = localStorage.getItem("bookloop.name") || "Reader"
 
   const { picks, count } = useMemo(() => {
-    const arch = archFromStorage()
+    const genome = genomeFromStorage()
     const cards = BOOKS.map((book) => {
       const listing = LISTINGS.find((l) => l.bookId === book.id) ?? listingFor(book.id)
-      return buildCard(book, listing, arch)
+      return buildCard(book, listing, genome)
     }).sort((a, b) => b.match - a.match)
      const picks = cards.slice(0, 3)
      return { count: picks.length, picks }

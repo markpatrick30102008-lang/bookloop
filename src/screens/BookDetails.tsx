@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
-import { buildCard, archFromStorage, matchLabel, whyYoullLoveIt, type SwipeCard } from "../lib/matching"
+import { buildCard, genomeFromStorage, matchLabel, whyYoullLoveIt, type SwipeCard } from "../lib/matching"
 import { BOOKS, LISTINGS, SYNOPSES, coverUrl, listingFor } from "../data/books"
 import { conditionMeta } from "../lib/conditions"
 import { CoverImg } from "../components/CoverImg"
@@ -166,7 +166,7 @@ export function BookDetails({
           >
             <p className="text-xs font-bold tracking-wide text-amber-deep uppercase">Why You'll Love It</p>
             <ul className="mt-3 space-y-2">
-              {whyYoullLoveIt(book).map((w) => (
+              {whyYoullLoveIt(book, genomeFromStorage()).map((w) => (
                 <li key={w} className="flex items-center gap-2.5 text-sm font-medium text-ink">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-forest text-[10px] font-black text-amber">
                     ✓
@@ -258,7 +258,7 @@ export function BookDetails({
                       key={b.id}
                       onClick={() => {
                         const listing = LISTINGS.find((l) => l.bookId === b.id) ?? listingFor(b.id)
-                        onSwitch?.(buildCard(b, listing, archFromStorage()))
+                        onSwitch?.(buildCard(b, listing, genomeFromStorage()))
                       }}
                       className="w-28 shrink-0 snap-start text-left"
                     >

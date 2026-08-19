@@ -3,6 +3,11 @@ import { CONDITION_LEVELS, conditionMeta } from "../src/lib/conditions"
 import { resolveCard } from "../src/lib/resolveBook"
 import { seedDemoData } from "../src/lib/demo"
 import { loadChats } from "../src/lib/chats"
+import { buildGenomeFromAnswers, bookDimensionsOf } from "../src/lib/readingDimensions"
+import { compatibilityScore, rankBooks } from "../src/lib/recommendationEngine"
+import { reasonsFor } from "../src/lib/recommendationReasons"
+import { personalityFromGenome } from "../src/lib/personalityMapper"
+import { genomeFromStorage } from "../src/lib/recommendationService"
 
 const store = new Map<string, string>([
   ["bookloop.quiz", JSON.stringify([["escapist"], ["cozy"], ["mystery"], ["heart"], ["thinker"]])],
@@ -135,6 +140,25 @@ assert(new Set(CONDITION_LEVELS.map((c) => c.emoji)).size === 4, "four distinct 
 const chats = loadChats()
 assert(chats.length === 3, "demo seeds 3 chats")
 assert(chats.every((c) => typeof c.verified === "boolean"), "every seeded chat has a verified flag")
+
+// 8. Recommendation Engine sanity
+console.log("RC verify: Recommendation Engine")
+const fantasyAnswers = [["fantasy"], ["escapist"], ["fantasy"], ["heart"], ["escapist"]]
+const fantasyGenome = buildGenomeFromAnswers(fantasyAnswers)
+const hp = BOOKS.find((b) => b.id === "b1")!
+const pnp = BOOKS.find((b) => b.id === "b8")!
+assert(
+  compatibilityScore(fantasyGenome, bookDimensionsOf(hp)) > compatibilityScore(fantasyGenome, bookDimensionsOf(pnp)),
+  "a fantasy-heavy genome ranks fantasy over romance",
+)
+const ranked = rankBooks(fantasyGenome, BOOKS)
+assert(ranked[0].book.id === "b1", "top-ranked book for the fantasy genome is Harry Potter")
+const reasons = reasonsFor(fantasyGenome, bookDimensionsOf(hp))
+assert(reasons.length > 0, "dynamic recommendation reasons are generated")
+assert(reasons.every((r) => r.trim().length > 0 && r.endsWith(".")), "reasons are non-empty sentences")
+assert(personalityFromGenome(fantasyGenome).id === "escapist", "fantasy genome maps to The Escapist personality")
+const genome = genomeFromStorage()
+assert(Object.values(genome).every((v) => v >= 0 && v <= 100), "every genome dimension stays within 0–100")
 
 console.log(failed === 0 ? "PASS: all release-candidate checks succeeded" : `FAIL: ${failed} check(s) failed`)
 process.exit(failed === 0 ? 0 : 1)

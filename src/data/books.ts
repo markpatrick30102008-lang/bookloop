@@ -1,3 +1,5 @@
+import type { ReaderGenome } from "../lib/readingDimensions"
+
 export type Book = {
   id: string
   title: string
@@ -6,25 +8,27 @@ export type Book = {
   genre: string
   year: number
   tags: string[]
+  /** Reading-dimension profile (0–100) used by the Recommendation Engine. */
+  dimensions?: Partial<ReaderGenome>
 }
 
 export const coverUrl = (isbn: string) => `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`
 
 export const BOOKS: Book[] = [
-  { id: "b1", title: "Harry Potter and the Sorcerer's Stone", author: "J.K. Rowling", isbn: "9780590353427", genre: "Fantasy", year: 1997, tags: ["fantasy", "escapist", "cozy"] },
-  { id: "b2", title: "The Hobbit", author: "J.R.R. Tolkien", isbn: "9780547928227", genre: "Fantasy", year: 1937, tags: ["fantasy", "escapist"] },
-  { id: "b3", title: "Dune", author: "Frank Herbert", isbn: "9780441172719", genre: "Sci-Fi", year: 1965, tags: ["scifi", "escapist", "thinker"] },
-  { id: "b4", title: "Project Hail Mary", author: "Andy Weir", isbn: "9780593135204", genre: "Sci-Fi", year: 2021, tags: ["scifi", "sleuth", "cozy"] },
-  { id: "b5", title: "The Silent Patient", author: "Alex Michaelides", isbn: "9781250301697", genre: "Thriller", year: 2019, tags: ["mystery", "sleuth"] },
-  { id: "b6", title: "Gone Girl", author: "Gillian Flynn", isbn: "9780307588371", genre: "Thriller", year: 2012, tags: ["mystery", "sleuth", "thinker"] },
-  { id: "b7", title: "The Midnight Library", author: "Matt Haig", isbn: "9780525559474", genre: "Fiction", year: 2020, tags: ["heart", "literary", "cozy"] },
-  { id: "b8", title: "Pride and Prejudice", author: "Jane Austen", isbn: "9780141439518", genre: "Classic", year: 1813, tags: ["heart", "cozy"] },
-  { id: "b9", title: "Circe", author: "Madeline Miller", isbn: "9780316556347", genre: "Fantasy", year: 2018, tags: ["fantasy", "literary", "heart"] },
-  { id: "b10", title: "Atomic Habits", author: "James Clear", isbn: "9780735211292", genre: "Self-Help", year: 2018, tags: ["thinker", "cozy"] },
-  { id: "b11", title: "Sapiens", author: "Yuval Noah Harari", isbn: "9780062316097", genre: "Non-Fiction", year: 2011, tags: ["thinker", "literary"] },
-  { id: "b12", title: "The Alchemist", author: "Paulo Coelho", isbn: "9780062315007", genre: "Fiction", year: 1988, tags: ["literary", "heart", "cozy"] },
-  { id: "b13", title: "The Hunger Games", author: "Suzanne Collins", isbn: "9780439023481", genre: "Dystopia", year: 2008, tags: ["scifi", "escapist", "sleuth"] },
-  { id: "b14", title: "The Great Gatsby", author: "F. Scott Fitzgerald", isbn: "9780743273565", genre: "Classic", year: 1925, tags: ["literary", "heart"] },
+  { id: "b1", title: "Harry Potter and the Sorcerer's Stone", author: "J.K. Rowling", isbn: "9780590353427", genre: "Fantasy", year: 1997, tags: ["fantasy", "escapist", "cozy"], dimensions: { fantasy: 95, worldBuilding: 90, adventure: 70, characterDriven: 55, emotional: 45, humor: 40, mystery: 20, cozy: 30 } },
+  { id: "b2", title: "The Hobbit", author: "J.R.R. Tolkien", isbn: "9780547928227", genre: "Fantasy", year: 1937, tags: ["fantasy", "escapist"], dimensions: { fantasy: 85, adventure: 80, worldBuilding: 75, characterDriven: 45, humor: 30, cozy: 25, darkThemes: 20 } },
+  { id: "b3", title: "Dune", author: "Frank Herbert", isbn: "9780441172719", genre: "Sci-Fi", year: 1965, tags: ["scifi", "escapist", "thinker"], dimensions: { scifi: 90, philosophy: 70, complex: 65, worldBuilding: 85, adventure: 45, thriller: 40, darkThemes: 40 } },
+  { id: "b4", title: "Project Hail Mary", author: "Andy Weir", isbn: "9780593135204", genre: "Sci-Fi", year: 2021, tags: ["scifi", "sleuth", "cozy"], dimensions: { scifi: 90, humor: 55, fastPace: 55, adventure: 45, emotional: 40, characterDriven: 45, complex: 35, educational: 25 } },
+  { id: "b5", title: "The Silent Patient", author: "Alex Michaelides", isbn: "9781250301697", genre: "Thriller", year: 2019, tags: ["mystery", "sleuth"], dimensions: { mystery: 90, plotTwists: 85, thriller: 75, darkThemes: 60, fastPace: 50, characterDriven: 40, emotional: 35 } },
+  { id: "b6", title: "Gone Girl", author: "Gillian Flynn", isbn: "9780307588371", genre: "Thriller", year: 2012, tags: ["mystery", "sleuth", "thinker"], dimensions: { thriller: 90, plotTwists: 85, mystery: 80, darkThemes: 70, characterDriven: 60, fastPace: 55, complex: 40, literary: 25 } },
+  { id: "b7", title: "The Midnight Library", author: "Matt Haig", isbn: "9780525559474", genre: "Fiction", year: 2020, tags: ["heart", "literary", "cozy"], dimensions: { literary: 75, emotional: 80, philosophy: 65, characterDriven: 60, cozy: 35, fantasy: 25 } },
+  { id: "b8", title: "Pride and Prejudice", author: "Jane Austen", isbn: "9780141439518", genre: "Classic", year: 1813, tags: ["heart", "cozy"], dimensions: { romance: 85, characterDriven: 80, humor: 65, emotional: 50, historical: 45, literary: 45, cozy: 40 } },
+  { id: "b9", title: "Circe", author: "Madeline Miller", isbn: "9780316556347", genre: "Fantasy", year: 2018, tags: ["fantasy", "literary", "heart"], dimensions: { fantasy: 80, literary: 70, characterDriven: 60, emotional: 55, worldBuilding: 55, historical: 50, darkThemes: 30, adventure: 25 } },
+  { id: "b10", title: "Atomic Habits", author: "James Clear", isbn: "9780735211292", genre: "Self-Help", year: 2018, tags: ["thinker", "cozy"], dimensions: { educational: 90, philosophy: 45, complex: 30, cozy: 20, humor: 15, biography: 10 } },
+  { id: "b11", title: "Sapiens", author: "Yuval Noah Harari", isbn: "9780062316097", genre: "Non-Fiction", year: 2011, tags: ["thinker", "literary"], dimensions: { educational: 90, philosophy: 75, complex: 70, historical: 80, biography: 30, literary: 20 } },
+  { id: "b12", title: "The Alchemist", author: "Paulo Coelho", isbn: "9780062315007", genre: "Fiction", year: 1988, tags: ["literary", "heart", "cozy"], dimensions: { literary: 65, philosophy: 70, emotional: 65, characterDriven: 50, cozy: 45, adventure: 30 } },
+  { id: "b13", title: "The Hunger Games", author: "Suzanne Collins", isbn: "9780439023481", genre: "Dystopia", year: 2008, tags: ["scifi", "escapist", "sleuth"], dimensions: { scifi: 75, thriller: 70, adventure: 65, darkThemes: 60, fastPace: 60, plotTwists: 45, characterDriven: 45, romance: 20 } },
+  { id: "b14", title: "The Great Gatsby", author: "F. Scott Fitzgerald", isbn: "9780743273565", genre: "Classic", year: 1925, tags: ["literary", "heart"], dimensions: { literary: 80, emotional: 60, characterDriven: 65, romance: 40, philosophy: 35, historical: 30, darkThemes: 35 } },
 ]
 
 export type Listing = {
@@ -40,17 +44,17 @@ export type Listing = {
 }
 
 export const EXTRA_BOOKS: Book[] = [
-  { id: "x1", title: "1984", author: "George Orwell", isbn: "9780451524935", genre: "Dystopia", year: 1949, tags: ["thinker", "literary"] },
-  { id: "x2", title: "Animal Farm", author: "George Orwell", isbn: "9780451526342", genre: "Dystopia", year: 1945, tags: ["thinker", "literary"] },
-  { id: "x3", title: "To Kill a Mockingbird", author: "Harper Lee", isbn: "9780061120084", genre: "Classic", year: 1960, tags: ["heart", "literary"] },
-  { id: "x4", title: "The Book Thief", author: "Markus Zusak", isbn: "9780375842207", genre: "Historical", year: 2005, tags: ["heart", "literary"] },
-  { id: "x5", title: "Wonder", author: "R.J. Palacio", isbn: "9780375869020", genre: "Fiction", year: 2012, tags: ["heart", "cozy"] },
-  { id: "x6", title: "The Fault in Our Stars", author: "John Green", isbn: "9780525478812", genre: "Romance", year: 2012, tags: ["heart", "literary"] },
-  { id: "x7", title: "The Lightning Thief", author: "Rick Riordan", isbn: "9780786856299", genre: "Fantasy", year: 2005, tags: ["fantasy", "escapist"] },
-  { id: "x8", title: "A Wrinkle in Time", author: "Madeleine L'Engle", isbn: "9780312367541", genre: "Sci-Fi", year: 1962, tags: ["scifi", "fantasy"] },
-  { id: "x9", title: "The Outsiders", author: "S.E. Hinton", isbn: "9780142407332", genre: "Classic", year: 1967, tags: ["heart", "literary"] },
-  { id: "x10", title: "Matilda", author: "Roald Dahl", isbn: "9780142410370", genre: "Fiction", year: 1988, tags: ["fantasy", "cozy"] },
-  { id: "x11", title: "Charlie and the Chocolate Factory", author: "Roald Dahl", isbn: "9780142410318", genre: "Fantasy", year: 1964, tags: ["fantasy", "cozy"] },
+  { id: "x1", title: "1984", author: "George Orwell", isbn: "9780451524935", genre: "Dystopia", year: 1949, tags: ["thinker", "literary"], dimensions: { scifi: 75, philosophy: 80, darkThemes: 70, complex: 75, thriller: 45, educational: 35, worldBuilding: 30, literary: 40 } },
+  { id: "x2", title: "Animal Farm", author: "George Orwell", isbn: "9780451526342", genre: "Dystopia", year: 1945, tags: ["thinker", "literary"], dimensions: { philosophy: 75, literary: 55, complex: 65, darkThemes: 55, historical: 35, educational: 40, humor: 20 } },
+  { id: "x3", title: "To Kill a Mockingbird", author: "Harper Lee", isbn: "9780061120084", genre: "Classic", year: 1960, tags: ["heart", "literary"], dimensions: { literary: 75, emotional: 75, characterDriven: 70, historical: 50, philosophy: 40, educational: 30, darkThemes: 40 } },
+  { id: "x4", title: "The Book Thief", author: "Markus Zusak", isbn: "9780375842207", genre: "Historical", year: 2005, tags: ["heart", "literary"], dimensions: { historical: 85, emotional: 80, literary: 65, characterDriven: 65, darkThemes: 60, plotTwists: 20 } },
+  { id: "x5", title: "Wonder", author: "R.J. Palacio", isbn: "9780375869020", genre: "Fiction", year: 2012, tags: ["heart", "cozy"], dimensions: { characterDriven: 75, emotional: 75, cozy: 55, educational: 30, humor: 25 } },
+  { id: "x6", title: "The Fault in Our Stars", author: "John Green", isbn: "9780525478812", genre: "Romance", year: 2012, tags: ["heart", "literary"], dimensions: { romance: 70, emotional: 85, characterDriven: 75, literary: 55, humor: 30, darkThemes: 35 } },
+  { id: "x7", title: "The Lightning Thief", author: "Rick Riordan", isbn: "9780786856299", genre: "Fantasy", year: 2005, tags: ["fantasy", "escapist"], dimensions: { fantasy: 80, adventure: 80, worldBuilding: 70, fastPace: 55, humor: 50, mystery: 30, plotTwists: 30 } },
+  { id: "x8", title: "A Wrinkle in Time", author: "Madeleine L'Engle", isbn: "9780312367541", genre: "Sci-Fi", year: 1962, tags: ["scifi", "fantasy"], dimensions: { scifi: 75, fantasy: 55, philosophy: 55, complex: 45, adventure: 35, worldBuilding: 35 } },
+  { id: "x9", title: "The Outsiders", author: "S.E. Hinton", isbn: "9780142407332", genre: "Classic", year: 1967, tags: ["heart", "literary"], dimensions: { literary: 60, emotional: 70, characterDriven: 75, darkThemes: 50, historical: 40 } },
+  { id: "x10", title: "Matilda", author: "Roald Dahl", isbn: "9780142410370", genre: "Fiction", year: 1988, tags: ["fantasy", "cozy"], dimensions: { fantasy: 60, characterDriven: 60, humor: 55, emotional: 55, cozy: 50, worldBuilding: 30, adventure: 20 } },
+  { id: "x11", title: "Charlie and the Chocolate Factory", author: "Roald Dahl", isbn: "9780142410318", genre: "Fantasy", year: 1964, tags: ["fantasy", "cozy"], dimensions: { fantasy: 65, humor: 75, adventure: 40, worldBuilding: 45, cozy: 40, characterDriven: 45 } },
 ]
 
 export const ALL_BOOKS = [...BOOKS, ...EXTRA_BOOKS]

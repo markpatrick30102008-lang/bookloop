@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion"
-import { archFromStorage, buildCard, matchLabel, whyList, type SwipeCard } from "../lib/matching"
+import { archFromStorage, buildCard, genomeFromStorage, matchLabel, whyList, type SwipeCard } from "../lib/matching"
 import { BOOKS, BOOK_MOODS, LISTINGS, MOODS, coverUrl, listingFor } from "../data/books"
 import { conditionMeta } from "../lib/conditions"
 import { CoverImg } from "../components/CoverImg"
@@ -16,10 +16,10 @@ const BADGE_SLOTS = new Map<number, string>([
 ])
 
 function buildFullDeck(): SwipeCard[] {
-  const arch = archFromStorage()
+  const genome = genomeFromStorage()
   const cards = BOOKS.map((book) => {
     const listing = LISTINGS.find((l) => l.bookId === book.id) ?? listingFor(book.id)
-    return buildCard(book, listing, arch)
+    return buildCard(book, listing, genome)
   })
     .sort((a, b) => b.match - a.match)
     .slice(0, DECK_SIZE)
@@ -55,7 +55,7 @@ function DeckCard({
     .map((w) => w[0])
     .slice(0, 2)
     .join("")
-  const whys = whyList(card.book)
+  const whys = whyList(card.book, genomeFromStorage())
   const condition = conditionMeta(card.listing.condition)
   const arch = archFromStorage()
   const stars = "★★★★★"
@@ -285,10 +285,10 @@ export function Swipe() {
   }
 
   const reshuffle = () => {
-    const arch = archFromStorage()
+    const genome = genomeFromStorage()
     const fresh = BOOKS.map((book) => {
       const listing = LISTINGS.find((l) => l.bookId === book.id) ?? listingFor(book.id)
-      return buildCard(book, listing, arch)
+      return buildCard(book, listing, genome)
     })
       .sort((a, b) => a.match - b.match)
       .slice(0, DECK_SIZE)

@@ -2,6 +2,8 @@ import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { scoreQuiz } from "../lib/quiz"
+import { buildGenomeFromAnswers } from "../lib/readingDimensions"
+import { rankBooks } from "../lib/recommendationEngine"
 import { BOOKS, coverUrl } from "../data/books"
 import { LoopLogo } from "../components/LoopLogo"
 
@@ -17,12 +19,7 @@ export function QuizResult() {
       answers = []
     }
     const arch = scoreQuiz(answers.length > 0 ? answers : [["cozy"]])
-    const scored = BOOKS.map((b) => ({
-      book: b,
-      score: b.tags.reduce((s, t) => s + (arch.tags.includes(t) ? 1 : 0), 0),
-    }))
-      .sort((a, b) => b.score - a.score || b.book.year - a.book.year)
-      .slice(0, 3)
+    const scored = rankBooks(buildGenomeFromAnswers(answers), BOOKS).slice(0, 3)
     return { name, arch, scored }
   }, [])
 
@@ -111,7 +108,7 @@ export function QuizResult() {
                 </div>
                 <div className="flex items-center gap-1 px-1 pt-0.5">
                   <span className="rounded-full bg-amber px-2 py-0.5 text-[10px] font-bold text-forest-deep">
-                    {Math.min(99, 70 + score * 12)}% match
+                    {score}% match
                   </span>
                 </div>
               </div>

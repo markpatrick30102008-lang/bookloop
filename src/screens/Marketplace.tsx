@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
-import { archFromStorage, buildCard, shortTitle, similarTo, type SwipeCard } from "../lib/matching"
+import { archFromStorage, buildCard, genomeFromStorage, shortTitle, similarTo, type SwipeCard } from "../lib/matching"
 import { BOOKS, LISTINGS, coverUrl, listingFor } from "../data/books"
 import { CONDITION_LEVELS, conditionMeta } from "../lib/conditions"
 import { loadMyListings } from "../lib/myListings"
@@ -128,15 +128,16 @@ function ListingCard({ card, rescue, reserved, onOpen }: { card: SwipeCard; resc
 export function Marketplace() {
   const navigate = useNavigate()
   const arch = archFromStorage()
+  const genome = useMemo(() => genomeFromStorage(), [])
 
   const deck = useMemo(() => {
     const catalog = BOOKS.map((book) => {
       const listing = LISTINGS.find((l) => l.bookId === book.id) ?? listingFor(book.id)
-      return buildCard(book, listing, arch)
+      return buildCard(book, listing, genome)
     })
-    const mine = loadMyListings().map(({ book, listing, score }) => ({ ...buildCard(book, listing, arch), score, verified: true }))
+    const mine = loadMyListings().map(({ book, listing, score }) => ({ ...buildCard(book, listing, genome), score, verified: true }))
     return [...mine, ...catalog]
-  }, [arch])
+  }, [genome])
 
   const [tab, setTab] = useState<TabId>("recommended")
   const [query, setQuery] = useState("")

@@ -5,7 +5,8 @@ import { LoopLogo } from "../components/LoopLogo"
 import { CoverImg } from "../components/CoverImg"
 import { MatchRing } from "../components/MatchRing"
 import { AboutModal } from "../components/AboutModal"
-import { archFromStorage } from "../lib/matching"
+import { archFromStorage, genomeFromStorage } from "../lib/matching"
+import { rankBooks } from "../lib/recommendationEngine"
 import { BOOKS, LISTINGS, coverUrl } from "../data/books"
 
 const TRENDING_IDS = ["b4", "b13", "b7", "b5", "b9", "b3", "b10"]
@@ -23,18 +24,19 @@ export function Home() {
   const data = useMemo(() => {
     const name = localStorage.getItem("bookloop.name") || "Reader"
     const arch = archFromStorage()
-    const scored = BOOKS.map((b) => ({
-      book: b,
-      score: b.tags.reduce((s, t) => s + (arch.tags.includes(t) ? 1 : 0), 0),
-      match: Math.min(99, 62 + b.tags.reduce((s, t) => s + (arch.tags.includes(t) ? 1 : 0), 0) * 14),
-    })).sort((a, b) => b.score - a.score || b.book.year - b.book.year)
+    const genome = genomeFromStorage()
+    const scored = rankBooks(genome, BOOKS)
+    const scoreOf = new Map(scored.map((s) => [s.book.id, s.score]))
 
-    const bestListing = LISTINGS.filter((l) => l.available).sort((a, b) => b.match - a.match)[0]
+    const bestListing = [...LISTINGS.filter((l) => l.available)].sort(
+      (a, b) => (scoreOf.get(b.bookId) ?? 0) - (scoreOf.get(a.bookId) ?? 0),
+    )[0]
     const bestBook = scored.find((s) => s.book.id === bestListing?.bookId) ?? scored[0]
     const trending = TRENDING_IDS.map((id) => scored.find((s) => s.book.id === id)).filter(Boolean) as typeof scored
     const nearby = LISTINGS.filter((l) => l.available)
-      .sort((a, b) => b.match - a.match)
+      .sort((a, b) => (scoreOf.get(b.bookId) ?? 0) - (scoreOf.get(a.bookId) ?? 0))
       .slice(0, 3)
+      .map((listing) => ({ listing, score: scoreOf.get(listing.bookId) ?? 0 }))
     return { name, arch, bestListing, bestBook, trending, nearby }
   }, [])
 
@@ -142,7 +144,7 @@ export function Home() {
                 )}
               </div>
             </div>
-            <MatchRing value={bestBook.match} />
+            <MatchRing value={bestBook.score} />
           </div>
         </motion.div>
 
@@ -167,7 +169,7 @@ export function Home() {
             </button>
           </div>
           <div className="no-scrollbar -mx-6 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2">
-            {trending.map(({ book, match }) => (
+            {trending.map(({ book, score }) => (
               <motion.button
                 key={book.id}
                 whileHover={{ y: -4, scale: 1.02 }}
@@ -182,7 +184,7 @@ export function Home() {
                     className="h-44 w-32 rounded-2xl object-cover shadow-[0_10px_22px_rgba(46,42,36,0.28)] transition-shadow duration-300 hover:shadow-[0_16px_30px_rgba(46,42,36,0.35)]"
                   />
                   <span className="absolute right-2 bottom-2 rounded-full bg-forest px-2 py-0.5 text-[10px] font-bold text-amber shadow">
-                    {match}% match
+                    {score}% match
                   </span>
                 </div>
                 <p className="mt-2 line-clamp-2 text-sm leading-tight font-medium text-ink">{book.title}</p>
@@ -200,7 +202,7 @@ export function Home() {
             </button>
           </div>
           <div className="mt-4 flex flex-col gap-3">
-            {nearby.map((l) => {
+            {nearby.map(({ listing: l, score }) => {
               const book = BOOKS.find((b) => b.id === l.bookId)!
               return (
                 <motion.button
@@ -231,7 +233,7 @@ export function Home() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    <span className="font-display text-lg font-bold text-amber-deep">{l.match}%</span>
+                    <span className="font-display text-lg font-bold text-amber-deep">{score}%</span>
                     <p className="text-[10px] tracking-wide text-ink-soft uppercase">match</p>
                   </div>
                 </motion.button>
