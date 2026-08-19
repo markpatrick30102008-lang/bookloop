@@ -130,7 +130,7 @@ function DeckCard({
               <CoverImg
                 src={coverUrl(card.book.isbn)}
                 alt={card.book.title}
-                className="h-60 w-40 rounded-2xl object-cover shadow-[0_30px_60px_rgba(0,0,0,0.6)] ring-1 ring-paper/15"
+                className="w-40 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] ring-1 ring-paper/15"
               />
               <span className="absolute -right-2.5 -bottom-2.5 rounded-xl bg-amber px-2.5 py-1 text-sm font-black text-forest-deep shadow-lg">
                 {card.listing.swapOnly ? "Swap" : `₹${card.listing.price}`}
@@ -344,6 +344,7 @@ export function Swipe() {
                 <CoverImg
                   src={coverUrl(c.book.isbn)}
                   alt={c.book.title}
+                  ratio={false}
                   className="h-full w-full object-cover opacity-30 blur-[2px]"
                 />
               </motion.div>

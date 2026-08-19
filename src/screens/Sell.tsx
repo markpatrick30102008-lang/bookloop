@@ -5,6 +5,7 @@ import { ALL_BOOKS, coverUrl, type Book, type Listing } from "../data/books"
 import { conditionMeta } from "../lib/conditions"
 import { saveMyListing } from "../lib/myListings"
 import { CoverImg } from "../components/CoverImg"
+import { CountUp } from "../components/CountUp"
 import { PHOTO_SLOTS, INSPECTION_STEPS, inspectBook, type PhotoSlot, type InspectionReport } from "../lib/bookInspectionService"
 import { recommendPrice, evaluateCustomPrice, type PriceRecommendation } from "../lib/pricingEngine"
 import { calculateEarnings, formatPrice, type DeliveryOption, type EarningsBreakdown } from "../lib/earningsCalculator"
@@ -18,6 +19,32 @@ const GENRES = [...new Set(ALL_BOOKS.map((b) => b.genre))]
 const LOCATIONS = ["Campus Library", "Hillview Ave", "Riverside Café", "Central Station", "Maple Street"]
 
 const FIND_STEPS = ["Reading your book's data…", "Checking editions…", "Finding the cover…", "Done!"]
+
+const OPTIMIZE_STEPS = ["Improving photos…", "Optimizing pricing…", "Analyzing listing…", "Checking demand…", "Generating suggestions…"]
+
+function RisingScore({ target, className }: { target: number; className?: string }) {
+  const [v, setV] = useState(0)
+  useEffect(() => {
+    const path = [68, 74, 81, 92]
+    let i = 0
+    const t = setInterval(() => {
+      if (i >= path.length) {
+        setV(target)
+        clearInterval(t)
+        return
+      }
+      setV(path[i])
+      i += 1
+    }, 430)
+    return () => clearInterval(t)
+  }, [target])
+  return (
+    <span className={className}>
+      {v}
+      <span className="text-sm text-ink-soft">/100</span>
+    </span>
+  )
+}
 
 type SellerPhase =
   | "start"
@@ -105,6 +132,9 @@ export function Sell() {
 
   const [optimization, setOptimization] = useState<OptimizationResult | null>(null)
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
+  const [optRunning, setOptRunning] = useState(true)
+  const [optStep, setOptStep] = useState(0)
+  const [doneOpts, setDoneOpts] = useState<number[]>([])
 
   const [listed, setListed] = useState<{ book: Book; listing: Listing; score: number } | null>(null)
 
@@ -120,6 +150,15 @@ export function Sell() {
 
   const photoCount = Object.values(photos).filter(Boolean).length
   const uploadedSlots = (Object.keys(photos) as PhotoSlot[]).filter((k) => photos[k] !== null)
+
+  const confidenceChecks = [
+    { label: "Excellent photos", passed: photoCount >= 5 },
+    { label: "Fair price", passed: priceMode === "suggested" },
+    { label: "High demand", passed: demand?.level === "High" },
+    { label: "AI verified condition", passed: (report?.aiConfidence ?? 0) >= 90 },
+    { label: "Complete listing", passed: !!book && !!report },
+  ]
+  const confidence = Math.min(98, 80 + confidenceChecks.filter((c) => c.passed).length * 4)
 
   useEffect(() => {
     if (phase === "finding") {
@@ -154,6 +193,15 @@ export function Sell() {
       return () => { timers.forEach(clearTimeout); clearTimeout(end) }
     }
   }, [phase])
+
+  useEffect(() => {
+    if (phase === "optimize" && optRunning) {
+      setOptStep(0)
+      const timers = OPTIMIZE_STEPS.map((_, i) => setTimeout(() => setOptStep(i + 1), 620 * (i + 1)))
+      const end = setTimeout(() => setOptRunning(false), 620 * OPTIMIZE_STEPS.length + 250)
+      return () => { timers.forEach(clearTimeout); clearTimeout(end) }
+    }
+  }, [phase, optRunning])
 
   useEffect(() => () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -360,6 +408,7 @@ export function Sell() {
               <p className="mt-0.5 text-xs text-ink-soft">Nearby readers can find it, reserve it, and message you here.</p>
               <div className="mt-2 flex items-center justify-between">
                 <span className="rounded-full bg-forest px-3 py-1 text-xs font-bold text-amber">BookScore {listed.score}</span>
+                <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white">✓ AI Verified</span>
                 {earnings && <span className="text-xs font-semibold text-forest">You earn {formatPrice(earnings.netEarnings)}</span>}
               </div>
             </motion.div>
@@ -449,7 +498,7 @@ export function Sell() {
               <div className="mt-3 flex flex-col gap-2">
                 {results.slice(0, 6).map((b) => (
                   <button key={b.id} onClick={() => runFinding(b)} className="flex items-center gap-3 rounded-xl border border-mist bg-paper p-2.5 text-left transition hover:border-forest hover:shadow-md">
-                    <CoverImg src={coverUrl(b.isbn)} alt={b.title} className="h-16 w-11 shrink-0 rounded-lg object-cover shadow" />
+                    <CoverImg src={coverUrl(b.isbn)} alt={b.title} className="w-11 shrink-0 rounded-xl shadow" />
                     <div className="min-w-0 flex-1">
                       <p className="font-display line-clamp-1 text-sm font-semibold text-ink">{b.title}</p>
                       <p className="text-xs text-ink-soft">{b.author}</p>
@@ -487,7 +536,7 @@ export function Sell() {
         ) : phase === "photos" && book ? (
           <motion.div key="photos" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="mt-5">
             <div className="flex gap-4 rounded-2xl bg-gradient-to-r from-forest-deep to-forest p-4 text-paper shadow-[0_16px_36px_rgba(18,43,33,0.3)]">
-              <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="h-28 w-20 shrink-0 rounded-xl object-cover shadow-xl ring-1 ring-paper/20" />
+              <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="w-20 shrink-0 rounded-xl shadow-xl ring-1 ring-paper/20" />
               <div className="min-w-0 flex-1">
                 <span className="inline-block rounded-full bg-amber px-2.5 py-0.5 text-[10px] font-black text-forest-deep">{manual ? "Added by you" : "Auto-filled ✓"}</span>
                 <p className="font-display mt-1.5 line-clamp-2 text-lg leading-tight font-semibold">{book.title}</p>
@@ -532,7 +581,7 @@ export function Sell() {
         ) : phase === "health" && report && book ? (
           <motion.div key="health" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="mt-5">
             <div className="flex gap-4 rounded-2xl bg-gradient-to-r from-forest-deep to-forest p-4 text-paper shadow-[0_16px_36px_rgba(18,43,33,0.3)]">
-              <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="h-28 w-20 shrink-0 rounded-xl object-cover shadow-xl ring-1 ring-paper/20" />
+              <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="w-20 shrink-0 rounded-xl shadow-xl ring-1 ring-paper/20" />
               <div className="min-w-0 flex-1">
                 <p className="font-display line-clamp-2 text-lg leading-tight font-semibold">{book.title}</p>
                 <p className="text-xs text-paper/70">{book.author}</p>
@@ -541,18 +590,28 @@ export function Sell() {
 
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.15 }} className="mt-6 rounded-2xl border border-mist bg-paper p-5 shadow-sm text-center">
               <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Book Health</p>
-              <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, type: "spring" }} className="font-display mt-2 text-5xl font-black text-forest">{report.overallScore}<span className="text-2xl text-ink-soft">/100</span></motion.p>
-              <p className="mt-1 text-lg text-amber">{"⭐".repeat(report.stars)}</p>
+              <p className="mt-0.5 text-[10px] font-bold tracking-widest text-amber-deep uppercase">AI Book Assessment</p>
+              <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, type: "spring" }} className="font-display mt-2 text-5xl font-black text-forest">
+                <CountUp value={report.overallScore} duration={1400} />
+                <span className="text-2xl text-ink-soft">/100</span>
+              </motion.p>
+              <p className="mt-1 text-lg tracking-[0.2em] text-amber">{"★".repeat(report.stars)}{"☆".repeat(5 - report.stars)}</p>
+              <p className="mt-1 text-sm font-semibold text-ink">
+                {conditionMeta(report.condition).emoji} {conditionMeta(report.condition).label}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-ink-soft">
+                This score is calculated from the cover, pages, binding, spine, and overall condition.
+              </p>
             </motion.div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
-                <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Condition</p>
-                <p className="font-display mt-1 text-lg font-bold text-ink">{conditionMeta(report.condition).emoji} {conditionMeta(report.condition).label}</p>
-              </div>
-              <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
                 <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">AI Confidence</p>
                 <p className="font-display mt-1 text-lg font-bold text-forest">{report.aiConfidence}%</p>
+              </div>
+              <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
+                <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Reader Satisfaction</p>
+                <p className="font-display mt-1 text-lg font-bold text-forest">{report.readerSatisfaction}%</p>
               </div>
               <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
                 <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Exterior</p>
@@ -565,6 +624,10 @@ export function Sell() {
               <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
                 <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Binding</p>
                 <p className="font-display mt-1 text-lg font-bold text-ink">{report.bindingScore}</p>
+              </div>
+              <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
+                <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Expected Sale</p>
+                <p className="font-display mt-1 text-lg font-bold text-ink">{priceRecommendation?.expectedSaleDays ?? "3–5 Days"}</p>
               </div>
             </div>
 
@@ -592,7 +655,7 @@ export function Sell() {
         ) : phase === "price" && priceRecommendation && book ? (
           <motion.div key="price" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="mt-5">
             <div className="flex gap-4 rounded-2xl bg-gradient-to-r from-forest-deep to-forest p-4 text-paper shadow-[0_16px_36px_rgba(18,43,33,0.3)]">
-              <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="h-28 w-20 shrink-0 rounded-xl object-cover shadow-xl ring-1 ring-paper/20" />
+              <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="w-20 shrink-0 rounded-xl shadow-xl ring-1 ring-paper/20" />
               <div className="min-w-0 flex-1">
                 <p className="font-display line-clamp-2 text-lg leading-tight font-semibold">{book.title}</p>
                 <p className="text-xs text-paper/70">{book.author}</p>
@@ -602,9 +665,12 @@ export function Sell() {
             <div className="mt-6 rounded-2xl border border-mist bg-paper p-5 shadow-sm text-center">
               <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">AI Recommended Price</p>
               <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, type: "spring" }} className="font-display mt-2 text-5xl font-black text-forest">
-                ₹{priceRecommendation.recommended}
+                ₹<CountUp value={priceRecommendation.recommended} duration={1200} />
               </motion.p>
               <p className="mt-1 text-sm text-ink-soft">Fair range: ₹{priceRecommendation.fairLow}–₹{priceRecommendation.fairHigh}</p>
+              <p className="mt-2 text-xs leading-relaxed text-ink-soft">
+                Set by comparing recent sales of similar books in your area, adjusted for condition and demand.
+              </p>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
@@ -616,9 +682,21 @@ export function Sell() {
                 <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Expected Sale</p>
                 <p className="font-display mt-1 text-lg font-bold text-ink">{priceRecommendation.expectedSaleDays}</p>
               </div>
-              <div className="col-span-2 rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
+              <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
                 <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Confidence</p>
                 <p className="font-display mt-1 text-lg font-bold text-forest">{priceRecommendation.confidence}%</p>
+              </div>
+              <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
+                <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Selling Chance</p>
+                <p className="font-display mt-1 text-lg font-bold text-forest">
+                  <CountUp value={priceRecommendation.confidence} duration={1100} />%
+                </p>
+              </div>
+              <div className="col-span-2 rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
+                <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Expected Earnings</p>
+                <p className="font-display mt-1 text-lg font-bold text-forest">
+                  ₹<CountUp value={Math.round(earnings?.netEarnings ?? 0)} duration={1200} />
+                </p>
               </div>
             </div>
 
@@ -723,7 +801,7 @@ export function Sell() {
             <div className="rounded-2xl border border-mist bg-paper p-5 shadow-sm">
               <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Net Earnings</p>
               <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, type: "spring" }} className="font-display mt-2 text-5xl font-black text-forest">
-                ₹{Math.round(earnings.netEarnings)}
+                ₹<CountUp value={Math.round(earnings.netEarnings)} duration={1200} />
               </motion.p>
               <div className="mt-4 flex flex-col gap-2 border-t border-mist pt-3">
                 <div className="flex items-center justify-between text-sm">
@@ -764,7 +842,7 @@ export function Sell() {
 
             <div className="mt-7 flex gap-2.5">
               <button onClick={() => setPhase("delivery")} className="flex-1 rounded-full border border-mist py-3.5 font-semibold text-ink-soft transition hover:bg-mist/50">Back</button>
-              <button onClick={() => { runOptimize(); setPhase("optimize") }}
+              <button onClick={() => { runOptimize(); setOptRunning(true); setDoneOpts([]); setPhase("optimize") }}
                 className="flex-[2] rounded-full bg-gradient-to-r from-amber to-amber-deep py-3.5 font-bold text-forest-deep shadow-[0_10px_24px_rgba(217,138,31,0.35)]">
                 ✨ Optimize My Listing
               </button>
@@ -774,33 +852,79 @@ export function Sell() {
         /* ─── OPTIMIZE ─── */
         ) : phase === "optimize" && optimization && book ? (
           <motion.div key="optimize" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="mt-5">
-            <div className="rounded-2xl border border-mist bg-paper p-5 shadow-sm">
-              <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">✨ Optimization Suggestions</p>
-              <div className="mt-3 flex flex-col gap-2">
-                {optimization.optimizations.map((opt, i) => (
-                  <div key={i} className="flex items-center gap-3 rounded-xl bg-mist/30 px-3 py-2">
-                    <span className="text-base">{opt.icon}</span>
-                    <span className="flex-1 text-sm text-ink">{opt.text}</span>
-                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${opt.impact === "high" ? "bg-forest/10 text-forest" : opt.impact === "medium" ? "bg-amber/15 text-amber-deep" : "bg-mist text-ink-soft"}`}>{opt.impact.toUpperCase()}</span>
-                  </div>
-                ))}
+            {optRunning ? (
+              <div className="mt-10 flex flex-col items-center">
+                <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200, damping: 14 }} className="text-5xl">⚡</motion.div>
+                <h2 className="font-display mt-5 text-xl font-semibold text-ink">BookLoop Intelligence</h2>
+                <p className="mt-1 text-sm text-ink-soft">is optimizing your listing…</p>
+                <div className="mt-7 flex w-full flex-col gap-3.5">
+                  {OPTIMIZE_STEPS.map((label, i) => (
+                    <div key={label} className={`flex items-center gap-3 transition-opacity ${i > optStep ? "opacity-30" : "opacity-100"}`}>
+                      <span className="w-6 text-center text-base">{i === OPTIMIZE_STEPS.length - 1 ? "✨" : "⚙️"}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-ink">{label}</p>
+                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-mist">
+                          {i <= optStep && (
+                            <motion.div initial={{ width: 0 }} animate={{ width: "100%" }} transition={i === optStep && i < OPTIMIZE_STEPS.length - 1 ? { duration: 0.55, ease: "easeInOut" } : { duration: 0 }}
+                              className={`h-full rounded-full ${i === OPTIMIZE_STEPS.length - 1 ? "bg-moss" : "bg-gradient-to-r from-amber to-amber-deep"}`} />
+                          )}
+                        </div>
+                      </div>
+                      {i < optStep && <span className="text-moss">✓</span>}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="rounded-2xl border border-mist bg-paper p-5 shadow-sm">
+                  <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">✨ BookLoop Intelligence Suggestions</p>
+                  {optimization.optimizations.length === 0 || optimization.optimizations.every((_, i) => doneOpts.includes(i)) ? (
+                    <p className="mt-3 rounded-xl bg-moss/10 px-3 py-2 text-sm font-semibold text-moss">
+                      ✓ All suggestions completed — your listing is optimized.
+                    </p>
+                  ) : (
+                    <div className="mt-3 flex flex-col gap-2">
+                      {optimization.optimizations.map((opt, i) =>
+                        doneOpts.includes(i) ? null : (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: -14 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.14, type: "spring", stiffness: 220, damping: 20 }}
+                            className="flex items-center gap-3 rounded-xl bg-mist/30 px-3 py-2"
+                          >
+                            <span className="text-base">{opt.icon}</span>
+                            <span className="flex-1 text-sm text-ink">{opt.text}</span>
+                            <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${opt.impact === "high" ? "bg-forest/10 text-forest" : opt.impact === "medium" ? "bg-amber/15 text-amber-deep" : "bg-mist text-ink-soft"}`}>{opt.impact.toUpperCase()}</span>
+                            <button onClick={() => setDoneOpts((d) => [...d, i])} className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-ink-soft transition hover:bg-mist" aria-label="Dismiss suggestion">✕</button>
+                          </motion.div>
+                        ),
+                      )}
+                    </div>
+                  )}
+                </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
-                <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Quality</p>
-                <p className="font-display mt-1 text-2xl font-black text-forest">{optimization.qualityScore}<span className="text-sm text-ink-soft">/100</span></p>
-              </div>
-              <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
-                <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Sell %</p>
-                <p className="font-display mt-1 text-2xl font-black text-forest">{optimization.sellingProbability}%</p>
-              </div>
-              <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
-                <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Sale Time</p>
-                <p className="font-display mt-1 text-lg font-bold text-ink">{optimization.estimatedSaleDays}</p>
-              </div>
-            </div>
+                <div className="mt-4 grid grid-cols-3 gap-3">
+                  <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
+                    <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Quality</p>
+                    <p className="font-display mt-1 text-2xl font-black text-forest">
+                      <RisingScore target={optimization.qualityScore} />
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
+                    <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Sell %</p>
+                    <p className="font-display mt-1 text-2xl font-black text-forest">
+                      <CountUp value={optimization.sellingProbability} duration={1200} />%
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-mist bg-paper p-3 shadow-sm text-center">
+                    <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Sale Time</p>
+                    <p className="font-display mt-1 text-lg font-bold text-ink">{optimization.estimatedSaleDays}</p>
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className="mt-7 flex gap-2.5">
               <button onClick={() => setPhase("earnings")} className="flex-1 rounded-full border border-mist py-3.5 font-semibold text-ink-soft transition hover:bg-mist/50">Back</button>
@@ -812,12 +936,12 @@ export function Sell() {
           </motion.div>
 
         /* ─── DASHBOARD + PUBLISH ─── */
-        ) : phase === "dashboard" && dashboard && earnings && priceRecommendation && demand && book ? (
+        ) : phase === "dashboard" && dashboard && earnings && priceRecommendation && demand && optimization && book ? (
           <motion.div key="dashboard" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="mt-5">
             <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Listing Summary</p>
             <div className="mt-2 rounded-2xl border border-mist bg-paper p-4 shadow-sm">
               <div className="flex items-center gap-3">
-                <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="h-20 w-14 shrink-0 rounded-lg object-cover shadow" />
+                <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="w-14 shrink-0 rounded-xl shadow" />
                 <div className="min-w-0 flex-1">
                   <p className="font-display line-clamp-1 text-sm font-semibold text-ink">{book.title}</p>
                   <p className="text-xs text-ink-soft">{book.author}</p>
@@ -827,6 +951,27 @@ export function Sell() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-emerald-600/30 bg-emerald-600/5 p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold tracking-widest text-forest uppercase">Seller Confidence</p>
+                <span className="font-display text-2xl font-black text-forest">
+                  <CountUp value={confidence} duration={1100} />%
+                </span>
+              </div>
+              <p className="mt-0.5 text-sm font-semibold text-ink">Your listing is ready!</p>
+              <div className="mt-3 flex flex-col gap-1.5">
+                {confidenceChecks.map((c) => (
+                  <div key={c.label} className="flex items-center gap-2 text-xs">
+                    <span className={c.passed ? "text-moss" : "text-ink-soft/40"}>✓</span>
+                    <span className={c.passed ? "text-ink" : "text-ink-soft line-through"}>{c.label}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 rounded-xl bg-paper px-3 py-2 text-xs font-semibold text-forest">
+                Estimated chance of selling within 7 days: {optimization.sellingProbability}%
+              </p>
             </div>
 
             <div className="mt-4 flex flex-col gap-2">

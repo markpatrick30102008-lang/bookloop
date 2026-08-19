@@ -187,9 +187,9 @@ export function Messages() {
           <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 150, damping: 14 }} className="text-5xl">
             💬
           </motion.div>
-          <h2 className="font-display mt-4 text-xl font-semibold text-ink">No messages yet</h2>
+          <h2 className="font-display mt-4 text-xl font-semibold text-ink">No conversations yet</h2>
           <p className="mt-2 max-w-xs text-sm text-ink-soft">
-            Reserve a book and your conversation with the seller will start right here.
+            Reserve a book to start chatting with its owner — your conversation will live right here.
           </p>
           <button
             onClick={() => navigate("/marketplace")}

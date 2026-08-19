@@ -59,9 +59,11 @@ export function buildCard(book: Book, listing: Listing, genome: ReaderGenome = g
 }
 
 export function matchLabel(value: number): string {
-  if (value >= 88) return "Excellent Match"
-  if (value >= 75) return "Great Match"
-  return "Worth Exploring"
+  if (value >= 90) return "Excellent Match"
+  if (value >= 80) return "Great Match"
+  if (value >= 70) return "Good Match"
+  if (value >= 60) return "Worth Exploring"
+  return "Maybe Later"
 }
 
 /**

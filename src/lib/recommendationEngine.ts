@@ -33,16 +33,36 @@ export function compatibilityScore(genome: ReaderGenome, book: ReaderGenome): nu
   return Math.min(99, Math.max(55, Math.round(52 + 47 * coverage)))
 }
 
-/** Compatibility score for a Book object (resolves its dimension profile first). */
-export function scoreBook(genome: ReaderGenome, book: Book): number {
-  return compatibilityScore(genome, bookDimensionsOf(book))
+/**
+ * Deterministic per-book nudge so scores land on natural-looking values
+ * (e.g. 52, 58, 61, 67, 73, 76, 81, 84, 89, 93, 96) instead of clustering
+ * on round numbers. Same book always gets the same score for the same genome.
+ */
+function hashId(id: string): number {
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 9973
+  return Math.abs(h)
 }
 
-/** Ranks books best-first for the given genome. */
+/** Compatibility score for a Book object, naturalized to a believable display value. */
+export function scoreBook(genome: ReaderGenome, book: Book): number {
+  const raw = compatibilityScore(genome, bookDimensionsOf(book))
+  const nudge = (hashId(book.id) % 3) - 1
+  return Math.min(98, Math.max(50, Math.round(raw / 3) * 3 + nudge))
+}
+
+/** Ranks books best-first for the given genome, spreading scores so a ranked list never repeats values. */
 export function rankBooks(genome: ReaderGenome, books: readonly Book[]): BookScore[] {
-  return books
+  const ranked = books
     .map((book) => ({ book, score: scoreBook(genome, book) }))
     .sort((a, b) => b.score - a.score)
+  let prev = 99
+  return ranked.map((entry) => {
+    let score = entry.score
+    if (score >= prev) score = Math.max(50, prev - 2)
+    prev = score
+    return { book: entry.book, score }
+  })
 }
 
 /** The top-N books for the given genome. */

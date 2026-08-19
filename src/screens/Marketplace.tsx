@@ -6,6 +6,7 @@ import { BOOKS, LISTINGS, coverUrl, listingFor } from "../data/books"
 import { CONDITION_LEVELS, conditionMeta } from "../lib/conditions"
 import { loadMyListings } from "../lib/myListings"
 import { isReserved } from "../lib/reservations"
+import { CoverImg } from "../components/CoverImg"
 
 type TabId = "recommended" | "near" | "trending" | "deals" | "rescue"
 
@@ -69,18 +70,17 @@ function ListingCard({ card, rescue, reserved, onOpen }: { card: SwipeCard; resc
       }`}
     >
       <div className="relative overflow-hidden">
-        <img
+        <CoverImg
           src={coverUrl(card.book.isbn)}
           alt={card.book.title}
-          className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
+          className="w-full shadow-none transition-transform duration-300 group-hover:scale-105"
         />
         <span className="absolute top-2 left-2 rounded-full bg-amber px-2.5 py-1 text-[11px] font-black text-forest-deep shadow-md transition-shadow duration-300 group-hover:shadow-[0_0_18px_rgba(244,163,64,0.6)]">
           {card.match}% match
         </span>
         {card.score !== undefined && (
-          <span className="absolute bottom-2 left-2 rounded-lg bg-forest-deep/90 px-2 py-0.5 text-[10px] font-bold text-amber shadow">
-            BookScore {card.score}
+          <span className="absolute bottom-2 left-2 rounded-lg bg-emerald-600/95 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+            ✓ AI Verified · Health {card.score}%
           </span>
         )}
         <span className="absolute right-2 bottom-2 rounded-lg bg-paper/95 px-2 py-0.5 text-[11px] font-black text-forest shadow">
@@ -299,9 +299,9 @@ export function Marketplace() {
           <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-5xl">
             🔍
           </motion.div>
-          <h2 className="font-display mt-4 text-xl font-semibold text-ink">No matching books found</h2>
+          <h2 className="font-display mt-4 text-xl font-semibold text-ink">Looks quiet here today</h2>
           <p className="mt-2 max-w-xs text-sm text-ink-soft">
-            Try a different search or clear your filters — your perfect match might be one tap away.
+            Try expanding your search radius — your perfect match might be one tap away.
           </p>
           <button
             onClick={() => {

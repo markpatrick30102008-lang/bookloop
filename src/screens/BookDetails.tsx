@@ -8,6 +8,7 @@ import { CoverImg } from "../components/CoverImg"
 import { MatchRing } from "../components/MatchRing"
 import { addReservationChat } from "../lib/chats"
 import { isReserved, markReserved } from "../lib/reservations"
+import { recordView } from "../lib/recentlyViewed"
 
 const PROCESS_STEPS = ["Confirming pickup details…", "Notifying the seller…", "Opening your message thread…"]
 
@@ -62,6 +63,7 @@ export function BookDetails({
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 })
+    recordView(book.id)
   }, [book.id])
 
   const initials = listing.seller
@@ -109,7 +111,7 @@ export function BookDetails({
                 <CoverImg
                   src={coverUrl(book.isbn)}
                   alt={book.title}
-                  className="h-64 w-44 rounded-2xl object-cover shadow-[0_24px_48px_rgba(0,0,0,0.45)]"
+                  className="w-44 rounded-2xl shadow-[0_24px_48px_rgba(0,0,0,0.45)]"
                 />
                 <div className="absolute -top-3 -right-3 rotate-6 rounded-xl bg-amber px-2.5 py-1 text-xs font-bold text-forest-deep shadow-lg">
                   {listing.swapOnly ? "Swap only" : `₹${listing.price}`}
@@ -235,12 +237,26 @@ export function BookDetails({
             <span className="rounded-full bg-mist px-4 py-1.5 text-sm font-medium text-ink-soft">
               Pickup: {listing.location}
             </span>
+            {card.score !== undefined && (
+              <span className="rounded-full bg-emerald-600/95 px-4 py-1.5 text-sm font-bold text-white">
+                ✓ AI Verified · Health {card.score}%
+              </span>
+            )}
             {reserved && (
               <span className="rounded-full bg-amber/15 px-4 py-1.5 text-sm font-bold text-amber-deep">
                 ⏳ Pending pickup
               </span>
             )}
           </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.72 }}
+            className="mt-3 flex items-center gap-1.5 text-xs text-ink-soft"
+          >
+            🔒 Secure payments · No personal details shared
+          </motion.p>
 
           {similar.length > 0 && (
             <motion.div
@@ -252,7 +268,7 @@ export function BookDetails({
               <h2 className="font-display text-lg font-semibold text-ink">If you love this, try</h2>
               <div className="no-scrollbar -mx-6 mt-3 flex snap-x gap-4 overflow-x-auto px-6 pb-2">
                 {similar.map((b) => {
-                  const simMatch = Math.min(99, match + (b.tags.filter((t) => book.tags.includes(t)).length ? 3 : 0))
+                  const simMatch = Math.max(50, Math.min(98, match + (b.tags.filter((t) => book.tags.includes(t)).length ? 2 : -2)))
                   return (
                     <button
                       key={b.id}
@@ -266,7 +282,7 @@ export function BookDetails({
                         <CoverImg
                           src={coverUrl(b.isbn)}
                           alt={b.title}
-                          className="h-40 w-28 rounded-xl object-cover shadow-md"
+                          className="w-28 rounded-xl shadow-md"
                         />
                         <span className="absolute right-1.5 bottom-1.5 rounded-full bg-forest px-2 py-0.5 text-[10px] font-bold text-amber">
                           {simMatch}% match
@@ -344,7 +360,7 @@ export function BookDetails({
                 <CoverImg
                   src={coverUrl(book.isbn)}
                   alt={book.title}
-                  className="h-24 w-16 shrink-0 rounded-lg object-cover shadow-md"
+                  className="w-16 shrink-0 rounded-xl shadow-md"
                 />
                 <div className="min-w-0">
                   <h3 className="font-display text-lg leading-snug font-semibold text-ink">{book.title}</h3>
@@ -391,7 +407,7 @@ export function BookDetails({
                 <CoverImg
                   src={coverUrl(book.isbn)}
                   alt={book.title}
-                  className="h-20 w-13 shrink-0 rounded-lg object-cover shadow-md"
+                  className="w-13 shrink-0 rounded-xl shadow-md"
                 />
                 <div>
                   <p className="text-[10px] font-bold tracking-widest text-amber-deep uppercase">Reserving</p>

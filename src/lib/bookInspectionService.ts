@@ -6,11 +6,11 @@ export type PhotoSlot = "Front" | "Back" | "Spine" | "Top Edge" | "Bottom Edge" 
 export const PHOTO_SLOTS: PhotoSlot[] = ["Front", "Back", "Spine", "Top Edge", "Bottom Edge", "Side Edge", "Inside Pages"]
 
 export const INSPECTION_STEPS = [
-  "Checking cover...",
+  "Analyzing cover...",
   "Checking pages...",
-  "Checking spine...",
-  "Calculating condition...",
-  "Generating report...",
+  "Inspecting spine...",
+  "Calculating score...",
+  "Generating recommendation...",
 ] as const
 
 export type DetectedIssue = { label: string; passed: boolean }
@@ -23,6 +23,7 @@ export type InspectionReport = {
   exteriorScore: number
   interiorScore: number
   bindingScore: number
+  readerSatisfaction: number
   issues: DetectedIssue[]
 }
 
@@ -61,6 +62,7 @@ export function inspectBook(book: Book, photoCount: number, uploadedSlots: Photo
   const condition = overallScore >= 90 ? "Like new" : overallScore >= 80 ? "Good" : overallScore >= 70 ? "Fair" : "Well loved"
   const stars = overallScore >= 90 ? 5 : overallScore >= 80 ? 4 : overallScore >= 70 ? 3 : 2
   const aiConfidence = clampScore(88 + (h % 10) + (photoCount >= 4 ? 3 : 0))
+  const readerSatisfaction = clampScore(interiorScore * 0.5 + bindingScore * 0.3 + overallScore * 0.2)
 
   const issues: DetectedIssue[] = [
     { label: "No writing", passed: h % 8 !== 0 },
@@ -72,7 +74,7 @@ export function inspectBook(book: Book, photoCount: number, uploadedSlots: Photo
     { label: "Spine uncreased", passed: h % 11 !== 0 },
   ]
 
-  return { overallScore, stars, condition, aiConfidence, exteriorScore, interiorScore, bindingScore, issues }
+  return { overallScore, stars, condition, aiConfidence, exteriorScore, interiorScore, bindingScore, readerSatisfaction, issues }
 }
 
 export function findSimilarListings(book: Book): typeof LISTINGS {

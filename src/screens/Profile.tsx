@@ -168,7 +168,7 @@ export function Profile() {
                     <CoverImg
                       src={coverUrl(book.isbn)}
                       alt={book.title}
-                      className="h-36 w-full rounded-xl object-cover shadow-md transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-lg"
+                      className="w-full rounded-xl shadow-md transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-lg"
                     />
                     <p className="mt-1.5 line-clamp-2 text-xs leading-tight font-medium text-ink">{book.title}</p>
                   </button>
@@ -187,7 +187,7 @@ export function Profile() {
                       <CoverImg
                         src={coverUrl(book.isbn)}
                         alt={book.title}
-                        className="h-36 w-full rounded-xl object-cover shadow-md transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-lg"
+                        className="w-full rounded-xl shadow-md transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-lg"
                       />
                       <span className="absolute right-1.5 bottom-1.5 rounded-full bg-forest/90 px-2 py-0.5 text-[9px] font-bold text-amber">✓ Done</span>
                     </div>
@@ -204,7 +204,7 @@ export function Profile() {
               <div className="flex flex-col gap-2.5">
                 {listings.map(({ book, listing, score }) => (
                   <button key={listing.id} onClick={() => navigate(`/book/${book.id}`)} className="flex items-center gap-3 rounded-2xl border border-mist bg-paper p-3 text-left shadow-sm transition hover:border-forest">
-                    <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="h-16 w-11 shrink-0 rounded-lg object-cover shadow" />
+                    <CoverImg src={coverUrl(book.isbn)} alt={book.title} className="w-11 shrink-0 rounded-xl shadow" />
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-1 text-sm font-semibold text-ink">{book.title}</p>
                       <p className="text-[11px] text-ink-soft">

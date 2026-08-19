@@ -4,9 +4,11 @@ import { motion } from "framer-motion"
 import { LoopLogo } from "../components/LoopLogo"
 import { CoverImg } from "../components/CoverImg"
 import { MatchRing } from "../components/MatchRing"
+import { CountUp } from "../components/CountUp"
 import { AboutModal } from "../components/AboutModal"
 import { archFromStorage, genomeFromStorage } from "../lib/matching"
 import { rankBooks } from "../lib/recommendationEngine"
+import { loadRecent } from "../lib/recentlyViewed"
 import { BOOKS, LISTINGS, coverUrl } from "../data/books"
 
 const TRENDING_IDS = ["b4", "b13", "b7", "b5", "b9", "b3", "b10"]
@@ -37,10 +39,14 @@ export function Home() {
       .sort((a, b) => (scoreOf.get(b.bookId) ?? 0) - (scoreOf.get(a.bookId) ?? 0))
       .slice(0, 3)
       .map((listing) => ({ listing, score: scoreOf.get(listing.bookId) ?? 0 }))
-    return { name, arch, bestListing, bestBook, trending, nearby }
+    const likedBooks = (JSON.parse(localStorage.getItem("bookloop.likes") || "[]") as string[])
+      .map((id) => BOOKS.find((b) => b.id === id))
+      .filter(Boolean) as typeof BOOKS
+    const recent = loadRecent()
+    return { name, arch, bestListing, bestBook, trending, nearby, likedBooks, recent }
   }, [])
 
-  const { name, arch, bestListing, bestBook, trending, nearby } = data
+  const { name, arch, bestListing, bestBook, trending, nearby, likedBooks, recent } = data
   const hour = new Date().getHours()
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening"
   const initials = name
@@ -84,7 +90,13 @@ export function Home() {
             <h1 className="font-display text-3xl leading-tight font-semibold sm:text-4xl">
               {greeting}, {name} <span className="inline-block">👋</span>
             </h1>
-            <p className="mt-2 text-paper/70">Ready for your next great read?</p>
+            <p className="mt-2 text-paper/70">
+              {likedBooks.length > 0
+                ? "Continue your reading journey."
+                : recent.length > 0
+                  ? "Your next chapter is waiting."
+                  : "Ready for your next great read?"}
+            </p>
           </motion.div>
 
           <motion.div {...fadeUp(0.18)} className="mt-5 flex flex-wrap items-center gap-2">
@@ -115,7 +127,7 @@ export function Home() {
               <CoverImg
                 src={coverUrl(bestBook.book.isbn)}
                 alt={bestBook.book.title}
-                className="h-40 w-27 rounded-xl object-cover shadow-[0_12px_24px_rgba(46,42,36,0.35)]"
+                className="w-27 shadow-[0_12px_24px_rgba(46,42,36,0.35)]"
               />
               <div className="absolute -top-2 -left-2 rotate-[-6deg] rounded-lg bg-forest px-2 py-1 text-[10px] font-bold text-amber shadow">
                 {bestBook.book.genre}
@@ -181,10 +193,10 @@ export function Home() {
                   <CoverImg
                     src={coverUrl(book.isbn)}
                     alt={book.title}
-                    className="h-44 w-32 rounded-2xl object-cover shadow-[0_10px_22px_rgba(46,42,36,0.28)] transition-shadow duration-300 hover:shadow-[0_16px_30px_rgba(46,42,36,0.35)]"
+                    className="w-32 rounded-2xl shadow-[0_10px_22px_rgba(46,42,36,0.28)] transition-shadow duration-300 hover:shadow-[0_16px_30px_rgba(46,42,36,0.35)]"
                   />
                   <span className="absolute right-2 bottom-2 rounded-full bg-forest px-2 py-0.5 text-[10px] font-bold text-amber shadow">
-                    {score}% match
+                    <CountUp value={score} />% match
                   </span>
                 </div>
                 <p className="mt-2 line-clamp-2 text-sm leading-tight font-medium text-ink">{book.title}</p>
@@ -194,7 +206,66 @@ export function Home() {
           </div>
         </motion.section>
 
-        <motion.section {...fadeUp(0.5)} className="mt-9">
+        {likedBooks.length > 0 && (
+          <motion.section {...fadeUp(0.46)} className="mt-9">
+            <div className="flex items-end justify-between">
+              <h2 className="font-display text-xl font-semibold text-ink">Continue Reading</h2>
+              <span className="text-xs text-ink-soft">Your shelf</span>
+            </div>
+            <div className="no-scrollbar -mx-6 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2">
+              {likedBooks.map((book) => (
+                <motion.button
+                  key={book.id}
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => navigate(`/book/${book.id}`)}
+                  className="w-28 shrink-0 snap-start text-left"
+                >
+                  <div className="relative">
+                    <CoverImg
+                      src={coverUrl(book.isbn)}
+                      alt={book.title}
+                      className="w-28 rounded-xl shadow-[0_10px_22px_rgba(46,42,36,0.25)]"
+                    />
+                    <span className="absolute bottom-2 left-2 rounded-full bg-amber/95 px-2 py-0.5 text-[10px] font-bold text-forest-deep shadow">
+                      Continue
+                    </span>
+                  </div>
+                  <p className="mt-2 line-clamp-1 text-sm font-medium text-ink">{book.title}</p>
+                </motion.button>
+              ))}
+            </div>
+          </motion.section>
+        )}
+
+        {recent.length > 0 && (
+          <motion.section {...fadeUp(0.5)} className="mt-9">
+            <div className="flex items-end justify-between">
+              <h2 className="font-display text-xl font-semibold text-ink">Recently Viewed</h2>
+              <span className="text-xs text-ink-soft">Pick up where you left off</span>
+            </div>
+            <div className="no-scrollbar -mx-6 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2">
+              {recent.map((book) => (
+                <motion.button
+                  key={book.id}
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => navigate(`/book/${book.id}`)}
+                  className="w-24 shrink-0 snap-start text-left"
+                >
+                  <CoverImg
+                    src={coverUrl(book.isbn)}
+                    alt={book.title}
+                    className="w-24 rounded-xl shadow-[0_10px_22px_rgba(46,42,36,0.25)]"
+                  />
+                  <p className="mt-2 line-clamp-2 text-xs leading-tight font-medium text-ink">{book.title}</p>
+                </motion.button>
+              ))}
+            </div>
+          </motion.section>
+        )}
+
+        <motion.section {...fadeUp(0.54)} className="mt-9">
           <div className="flex items-end justify-between">
             <h2 className="font-display text-xl font-semibold text-ink">Nearby on BookLoop</h2>
             <button onClick={() => navigate("/marketplace")} className="text-sm font-semibold text-forest hover:underline">
@@ -215,7 +286,7 @@ export function Home() {
                   <CoverImg
                     src={coverUrl(book.isbn)}
                     alt={book.title}
-                    className="h-20 w-14 shrink-0 rounded-lg object-cover shadow-md"
+                    className="w-14 shrink-0 shadow-md"
                   />
                   <div className="min-w-0 flex-1">
                     <p className="line-clamp-1 font-semibold text-ink">{book.title}</p>
@@ -233,7 +304,7 @@ export function Home() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    <span className="font-display text-lg font-bold text-amber-deep">{score}%</span>
+                    <CountUp value={score} className="font-display text-lg font-bold text-amber-deep" />
                     <p className="text-[10px] tracking-wide text-ink-soft uppercase">match</p>
                   </div>
                 </motion.button>

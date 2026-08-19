@@ -6,6 +6,7 @@ import { buildGenomeFromAnswers } from "../lib/readingDimensions"
 import { rankBooks } from "../lib/recommendationEngine"
 import { BOOKS, coverUrl } from "../data/books"
 import { LoopLogo } from "../components/LoopLogo"
+import { CoverImg } from "../components/CoverImg"
 
 export function QuizResult() {
   const navigate = useNavigate()
@@ -97,11 +98,10 @@ export function QuizResult() {
                 key={book.id}
                 className="group relative overflow-hidden rounded-2xl bg-paper/10 p-2 transition hover:bg-paper/15"
               >
-                <img
+                <CoverImg
                   src={coverUrl(book.isbn)}
                   alt={book.title}
-                  className="h-36 w-full rounded-xl object-cover shadow-lg"
-                  loading="lazy"
+                  className="w-full rounded-xl shadow-lg"
                 />
                 <div className="mt-2 truncate px-1 text-xs font-medium text-paper/90">
                   {book.title}
