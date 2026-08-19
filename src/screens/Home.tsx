@@ -129,7 +129,7 @@ export function Home() {
               <div className="mt-3 flex flex-wrap items-center gap-1.5">
                 {bestListing && (
                   <span className="rounded-full bg-forest/10 px-3 py-1 text-xs font-semibold text-forest">
-                    ${bestListing.price}
+                    ₹{bestListing.price}
                   </span>
                 )}
                 {bestListing && (
@@ -222,7 +222,7 @@ export function Home() {
                     <p className="mt-0.5 truncate text-xs text-ink-soft">{book.author}</p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                       <span className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-bold text-forest">
-                        ${l.price}
+                        ₹{l.price}
                       </span>
                       <span className="rounded-full bg-mist px-2 py-0.5 text-xs text-ink-soft">
                         {l.location}

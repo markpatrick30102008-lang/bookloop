@@ -208,7 +208,7 @@ export function Profile() {
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-1 text-sm font-semibold text-ink">{book.title}</p>
                       <p className="text-[11px] text-ink-soft">
-                        {listing.swapOnly ? "Swap" : `$${listing.price}`} · {conditionMeta(listing.condition).emoji} {conditionMeta(listing.condition).label} · 📍 {listing.location}
+                        {listing.swapOnly ? "Swap" : `₹${listing.price}`} · {conditionMeta(listing.condition).emoji} {conditionMeta(listing.condition).label} · 📍 {listing.location}
                       </p>
                     </div>
                     <div className="shrink-0 text-right">

@@ -28,8 +28,8 @@ export function buildDashboard(
     cards: [
       { label: "Book Health", value: `${report.overallScore}%`, sub: "⭐".repeat(report.stars), icon: "📖", color: "green" },
       { label: "Demand", value: demand.level, sub: demand.reason, icon: "🔥", color: demand.level === "High" ? "green" : "default" },
-      { label: "AI Fair Price", value: `$${price.recommended}`, sub: `$${price.fairLow}–${price.fairHigh}`, icon: "💡", color: "amber" },
-      { label: "Net Earnings", value: `$${earnings.netEarnings.toFixed(2)}`, sub: "After all fees", icon: "💰", color: "green" },
+      { label: "AI Fair Price", value: `₹${price.recommended}`, sub: `₹${price.fairLow}–₹${price.fairHigh}`, icon: "💡", color: "amber" },
+      { label: "Net Earnings", value: `₹${Math.round(earnings.netEarnings)}`, sub: "After all fees", icon: "💰", color: "green" },
       { label: "Expected Sale", value: price.expectedSaleDays, sub: `${price.confidence}% confidence`, icon: "⏱️", color: "default" },
       { label: "Selling Probability", value: `${optimization.sellingProbability}%`, sub: "Based on listing quality", icon: "🎯", color: "green" },
       { label: "Listing Quality", value: `${optimization.qualityScore}/100`, sub: `${optimization.optimizations.length} tips available`, icon: "✨", color: "amber" },

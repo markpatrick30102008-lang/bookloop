@@ -21,9 +21,9 @@ const GENRES = [...new Set(BOOKS.map((b) => b.genre))]
 const CONDITIONS = CONDITION_LEVELS
 
 const PRICE_BANDS: { id: string; label: string; test: (p: number) => boolean }[] = [
-  { id: "under5", label: "Under $5", test: (p) => p < 5 },
-  { id: "b5to8", label: "$5–8", test: (p) => p >= 5 && p <= 8 },
-  { id: "over8", label: "$8+", test: (p) => p > 8 },
+  { id: "under100", label: "Under ₹100", test: (p) => p < 100 },
+  { id: "100to200", label: "₹100–200", test: (p) => p >= 100 && p <= 200 },
+  { id: "over200", label: "₹200+", test: (p) => p > 200 },
 ]
 
 const DISTANCE_BANDS: { id: string; label: string; test: (d: number) => boolean }[] = [
@@ -84,7 +84,7 @@ function ListingCard({ card, rescue, reserved, onOpen }: { card: SwipeCard; resc
           </span>
         )}
         <span className="absolute right-2 bottom-2 rounded-lg bg-paper/95 px-2 py-0.5 text-[11px] font-black text-forest shadow">
-          {card.listing.swapOnly ? "Swap" : `$${card.listing.price}`}
+          {card.listing.swapOnly ? "Swap" : `₹${card.listing.price}`}
         </span>
         {rescue && (
           <span className="absolute top-2 right-2 rounded-full bg-forest-deep/90 px-2 py-0.5 text-[10px] font-bold text-amber">

@@ -64,18 +64,18 @@ export function findBook(id: string): Book | undefined {
 }
 
 export const LISTINGS: Listing[] = [
-  { id: "l1", bookId: "b1", seller: "Maya K.", price: 8, condition: "Good", location: "Campus Library", match: 96, available: true, swapOnly: false },
-  { id: "l2", bookId: "b4", seller: "Diego R.", price: 11, condition: "Like new", location: "Hillview Ave", match: 92, available: true, swapOnly: false },
-  { id: "l3", bookId: "b7", seller: "Aisha B.", price: 9, condition: "Good", location: "Riverside Café", match: 89, available: true, swapOnly: true },
-  { id: "l4", bookId: "b5", seller: "Tom W.", price: 6, condition: "Fair", location: "Central Station", match: 87, available: true, swapOnly: false },
-  { id: "l5", bookId: "b9", seller: "Sofia L.", price: 12, condition: "Like new", location: "Maple Street", match: 94, available: true, swapOnly: false },
-  { id: "l6", bookId: "b3", seller: "Kenji T.", price: 10, condition: "Good", location: "Campus Library", match: 85, available: true, swapOnly: true },
-  { id: "l7", bookId: "b11", seller: "Priya S.", price: 9, condition: "Good", location: "Riverside Café", match: 83, available: true, swapOnly: false },
-  { id: "l8", bookId: "b10", seller: "Leo M.", price: 7, condition: "Fair", location: "Hillview Ave", match: 81, available: true, swapOnly: false },
-  { id: "l9", bookId: "b13", seller: "Nina G.", price: 5, condition: "Good", location: "Central Station", match: 88, available: true, swapOnly: false },
-  { id: "l10", bookId: "b8", seller: "Clara D.", price: 4, condition: "Fair", location: "Maple Street", match: 78, available: true, swapOnly: true },
-  { id: "l11", bookId: "b2", seller: "Omar F.", price: 10, condition: "Good", location: "Campus Library", match: 90, available: true, swapOnly: false },
-  { id: "l12", bookId: "b12", seller: "Emma J.", price: 6, condition: "Good", location: "Riverside Café", match: 84, available: true, swapOnly: false },
+  { id: "l1", bookId: "b1", seller: "Maya K.", price: 160, condition: "Good", location: "Campus Library", match: 96, available: true, swapOnly: false },
+  { id: "l2", bookId: "b4", seller: "Diego R.", price: 220, condition: "Like new", location: "Hillview Ave", match: 92, available: true, swapOnly: false },
+  { id: "l3", bookId: "b7", seller: "Aisha B.", price: 180, condition: "Good", location: "Riverside Café", match: 89, available: true, swapOnly: true },
+  { id: "l4", bookId: "b5", seller: "Tom W.", price: 120, condition: "Fair", location: "Central Station", match: 87, available: true, swapOnly: false },
+  { id: "l5", bookId: "b9", seller: "Sofia L.", price: 240, condition: "Like new", location: "Maple Street", match: 94, available: true, swapOnly: false },
+  { id: "l6", bookId: "b3", seller: "Kenji T.", price: 200, condition: "Good", location: "Campus Library", match: 85, available: true, swapOnly: true },
+  { id: "l7", bookId: "b11", seller: "Priya S.", price: 180, condition: "Good", location: "Riverside Café", match: 83, available: true, swapOnly: false },
+  { id: "l8", bookId: "b10", seller: "Leo M.", price: 140, condition: "Fair", location: "Hillview Ave", match: 81, available: true, swapOnly: false },
+  { id: "l9", bookId: "b13", seller: "Nina G.", price: 100, condition: "Good", location: "Central Station", match: 88, available: true, swapOnly: false },
+  { id: "l10", bookId: "b8", seller: "Clara D.", price: 80, condition: "Fair", location: "Maple Street", match: 78, available: true, swapOnly: true },
+  { id: "l11", bookId: "b2", seller: "Omar F.", price: 200, condition: "Good", location: "Campus Library", match: 90, available: true, swapOnly: false },
+  { id: "l12", bookId: "b12", seller: "Emma J.", price: 120, condition: "Good", location: "Riverside Café", match: 84, available: true, swapOnly: false },
 ]
 
 export const SYNOPSES: Record<string, string> = {
@@ -132,7 +132,7 @@ export function listingFor(bookId: string): Listing {
     id: `syn-${bookId}`,
     bookId,
     seller: SELLER_NAMES[h % SELLER_NAMES.length],
-    price: 4 + (h % 10),
+    price: 80 + (h % 200),
     condition: CONDITIONS[h % CONDITIONS.length],
     location: LOCATIONS[(h >> 3) % LOCATIONS.length],
     match: 0,

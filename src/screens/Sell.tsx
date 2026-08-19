@@ -90,7 +90,7 @@ export function Sell() {
   const [condition, setCondition] = useState("Good")
 
   const [priceRecommendation, setPriceRecommendation] = useState<PriceRecommendation | null>(null)
-  const [price, setPrice] = useState(6)
+  const [price, setPrice] = useState(150)
   const [priceMode, setPriceMode] = useState<"suggested" | "custom">("suggested")
   const [customPriceInput, setCustomPriceInput] = useState("")
 
@@ -602,9 +602,9 @@ export function Sell() {
             <div className="mt-6 rounded-2xl border border-mist bg-paper p-5 shadow-sm text-center">
               <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">AI Recommended Price</p>
               <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, type: "spring" }} className="font-display mt-2 text-5xl font-black text-forest">
-                ${priceRecommendation.recommended}
+                ₹{priceRecommendation.recommended}
               </motion.p>
-              <p className="mt-1 text-sm text-ink-soft">Fair range: ${priceRecommendation.fairLow}–${priceRecommendation.fairHigh}</p>
+              <p className="mt-1 text-sm text-ink-soft">Fair range: ₹{priceRecommendation.fairLow}–₹{priceRecommendation.fairHigh}</p>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
@@ -624,7 +624,7 @@ export function Sell() {
 
             <div className="mt-5 flex gap-2">
               <button onClick={acceptSuggestedPrice} className={`flex-1 rounded-full py-3 font-bold text-sm transition ${priceMode === "suggested" ? "bg-forest text-paper shadow-md shadow-forest/20" : "border border-mist bg-paper text-ink-soft hover:bg-mist/50"}`}>
-                ✓ Accept ${priceRecommendation.recommended}
+                ✓ Accept ₹{priceRecommendation.recommended}
               </button>
               <button onClick={enterCustomPrice} className={`flex-1 rounded-full py-3 font-bold text-sm transition ${priceMode === "custom" ? "bg-forest text-paper shadow-md shadow-forest/20" : "border border-mist bg-paper text-ink-soft hover:bg-mist/50"}`}>
                 Enter My Price
@@ -634,7 +634,7 @@ export function Sell() {
             {priceMode === "custom" && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 overflow-hidden">
                 <div className="flex items-center gap-2 rounded-2xl border border-mist bg-paper p-3 shadow-sm">
-                  <span className="text-xl font-bold text-ink">$</span>
+                  <span className="text-xl font-bold text-ink">₹</span>
                   <input value={customPriceInput} onChange={(e) => setCustomPriceInput(e.target.value)} inputMode="decimal" className="flex-1 bg-transparent text-2xl font-bold text-ink outline-none" />
                   <button onClick={applyCustomPrice} className="rounded-full bg-forest px-4 py-2 text-sm font-bold text-paper">Set</button>
                 </div>
@@ -723,7 +723,7 @@ export function Sell() {
             <div className="rounded-2xl border border-mist bg-paper p-5 shadow-sm">
               <p className="text-[10px] font-bold tracking-widest text-ink-soft uppercase">Net Earnings</p>
               <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, type: "spring" }} className="font-display mt-2 text-5xl font-black text-forest">
-                ${earnings.netEarnings.toFixed(2)}
+                ₹{Math.round(earnings.netEarnings)}
               </motion.p>
               <div className="mt-4 flex flex-col gap-2 border-t border-mist pt-3">
                 <div className="flex items-center justify-between text-sm">

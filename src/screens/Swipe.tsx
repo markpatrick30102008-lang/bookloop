@@ -133,7 +133,7 @@ function DeckCard({
                 className="h-60 w-40 rounded-2xl object-cover shadow-[0_30px_60px_rgba(0,0,0,0.6)] ring-1 ring-paper/15"
               />
               <span className="absolute -right-2.5 -bottom-2.5 rounded-xl bg-amber px-2.5 py-1 text-sm font-black text-forest-deep shadow-lg">
-                {card.listing.swapOnly ? "Swap" : `$${card.listing.price}`}
+                {card.listing.swapOnly ? "Swap" : `₹${card.listing.price}`}
               </span>
             </div>
           </motion.div>

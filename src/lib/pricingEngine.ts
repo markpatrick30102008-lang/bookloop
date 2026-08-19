@@ -31,20 +31,20 @@ const GENRE_DEMAND: Record<string, number> = {
 }
 
 const BASE_PRICE_BY_GENRE: Record<string, number> = {
-  Fantasy: 9,
-  "Sci-Fi": 10,
-  Thriller: 8,
-  Romance: 7,
-  "Self-Help": 11,
-  "Non-Fiction": 10,
-  Fiction: 8,
-  Classic: 6,
-  Dystopia: 9,
-  Historical: 7,
+  Fantasy: 180,
+  "Sci-Fi": 200,
+  Thriller: 160,
+  Romance: 140,
+  "Self-Help": 220,
+  "Non-Fiction": 200,
+  Fiction: 160,
+  Classic: 120,
+  Dystopia: 180,
+  Historical: 140,
 }
 
 export function recommendPrice(book: Book, healthScore: number, condition: string, sellerReputation: number): PriceRecommendation {
-  const basePrice = BASE_PRICE_BY_GENRE[book.genre] ?? 8
+  const basePrice = BASE_PRICE_BY_GENRE[book.genre] ?? 160
   const conditionMult = CONDITION_MULTIPLIER[condition] ?? 0.82
   const demandMult = GENRE_DEMAND[book.genre] ?? 1.0
   const healthMult = 0.85 + (healthScore / 100) * 0.3
@@ -60,10 +60,10 @@ export function recommendPrice(book: Book, healthScore: number, condition: strin
   const rawPrice = basePrice * conditionMult * demandMult * healthMult * reputationMult * yearBonus
   const marketAdjusted = similarListings.length > 0 ? (rawPrice * 0.6 + avgListingPrice * 0.4) : rawPrice
 
-  const recommended = Math.round(Math.max(3, Math.min(18, marketAdjusted)) * 2) / 2
-  const spread = Math.max(1, recommended * 0.07)
-  const fairLow = Math.round((recommended - spread) * 2) / 2
-  const fairHigh = Math.round((recommended + spread) * 2) / 2
+  const recommended = Math.round(Math.max(50, Math.min(400, marketAdjusted)) / 10) * 10
+  const spread = Math.max(10, Math.round(recommended * 0.07 / 10) * 10)
+  const fairLow = recommended - spread
+  const fairHigh = recommended + spread
 
   const demandScore = GENRE_DEMAND[book.genre] ?? 1.0
   const demand: "High" | "Medium" | "Low" = demandScore >= 1.1 ? "High" : demandScore >= 1.0 ? "Medium" : "Low"
@@ -86,15 +86,15 @@ export function evaluateCustomPrice(customPrice: number, recommendation: PriceRe
     return {
       label: "expensive",
       message: "This price is above the average market value.",
-      extra: `You could sell faster at around $${recommendation.recommended}.`,
+      extra: `You could sell faster at around ₹${recommendation.recommended}.`,
     }
   }
   if (customPrice < recommendation.fairLow * 0.85) {
     const extra = recommendation.recommended - customPrice
     return {
       label: "cheap",
-      message: `You could earn around $${extra.toFixed(2)} more.`,
-      extra: `Recommended: $${recommendation.fairLow}–${recommendation.fairHigh}`,
+      message: `You could earn around ₹${extra} more.`,
+      extra: `Recommended: ₹${recommendation.fairLow}–₹${recommendation.fairHigh}`,
     }
   }
   return {

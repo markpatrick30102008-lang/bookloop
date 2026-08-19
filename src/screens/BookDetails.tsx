@@ -112,7 +112,7 @@ export function BookDetails({
                   className="h-64 w-44 rounded-2xl object-cover shadow-[0_24px_48px_rgba(0,0,0,0.45)]"
                 />
                 <div className="absolute -top-3 -right-3 rotate-6 rounded-xl bg-amber px-2.5 py-1 text-xs font-bold text-forest-deep shadow-lg">
-                  {listing.swapOnly ? "Swap only" : `$${listing.price}`}
+                  {listing.swapOnly ? "Swap only" : `₹${listing.price}`}
                 </div>
               </motion.div>
               <motion.div
@@ -227,7 +227,7 @@ export function BookDetails({
             className="mt-6 flex gap-2"
           >
             <span className="rounded-full bg-forest px-4 py-1.5 text-sm font-bold text-amber">
-              {listing.swapOnly ? "Swap — no cash" : `$${listing.price}`}
+              {listing.swapOnly ? "Swap — no cash" : `₹${listing.price}`}
             </span>
             <span className="rounded-full bg-mist px-4 py-1.5 text-sm font-medium text-ink-soft">
               {conditionMeta(listing.condition).emoji} {conditionMeta(listing.condition).label}
@@ -349,7 +349,7 @@ export function BookDetails({
                 <div className="min-w-0">
                   <h3 className="font-display text-lg leading-snug font-semibold text-ink">{book.title}</h3>
                   <p className="mt-1 text-sm text-ink-soft">
-                    {listing.swapOnly ? "Swap reservation" : `${listing.seller} · $${listing.price}`}
+                    {listing.swapOnly ? "Swap reservation" : `${listing.seller} · ₹${listing.price}`}
                   </p>
                   <p className="mt-2 rounded-xl bg-mist px-3 py-2 text-xs leading-relaxed text-ink-soft">
                     We'll notify <b>{listing.seller}</b> of your request. A message thread opens right here so you can arrange pickup — no personal details are shared.
